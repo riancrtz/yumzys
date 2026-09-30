@@ -12,6 +12,24 @@ const EMPTY_FORM = {
   photoLink: '',
 }
 
+const NAV = [
+  ['home', 'Home'],
+  ['visited', 'Visited'],
+  ['add', 'Add Place'],
+]
+
+const STATUS_OPTIONS = [
+  ['all', 'All statuses'],
+  ['want_to_try', 'Want to try'],
+  ['visited', 'Visited'],
+]
+
+const TYPE_OPTIONS = [
+  ['all', 'All types'],
+  ['restaurant', 'Restaurant'],
+  ['cafe', 'Cafe'],
+]
+
 function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -23,11 +41,9 @@ function LoginScreen({ onLogin }) {
   }
 
   return (
-    <div className="page">
-      <header>
-        <h1>Yumzys</h1>
-        <p className="lede">Restaurant &amp; café bucket list.</p>
-      </header>
+    <main className="login">
+      <h1>Yumzys</h1>
+      <p className="muted">Restaurant &amp; café bucket list.</p>
       <form onSubmit={handleSubmit} className="card">
         <h2>Log in</h2>
         <label htmlFor="username">Username</label>
@@ -40,18 +56,27 @@ function LoginScreen({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Log in</button>
+        <div className="form-actions">
+          <button type="submit">Log in</button>
+        </div>
       </form>
-    </div>
+    </main>
   )
 }
 
 function Stars({ value }) {
+  const count = Number(value) || 0
   return (
-    <span aria-label={`Rating ${value} of 5`}>
-      {'★'.repeat(value)}{'☆'.repeat(5 - value)}
+    <span className="stars" role="img" aria-label={`Rating ${count} of 5`}>
+      <span aria-hidden="true">{'★'.repeat(count)}{'☆'.repeat(5 - count)}</span>
+      <span className="stars-number" aria-hidden="true"> {count}/5</span>
     </span>
   )
+}
+
+function Rating({ place }) {
+  if (place.status === 'visited') return <Stars value={place.rating} />
+  return <span className="badge">Want to try</span>
 }
 
 function PlacePhoto({ url, name }) {
@@ -62,28 +87,33 @@ function PlacePhoto({ url, name }) {
   }, [url])
 
   if (!url || failed) {
-    return (
-      <div
-        className="muted"
-        style={{ padding: '2rem', textAlign: 'center', borderRadius: '8px', border: '1px dashed currentColor' }}
-      >
-        No photo yet
-      </div>
-    )
+    return <div className="photo photo-empty">No photo yet</div>
   }
 
   return (
     <img
+      className="photo"
       src={url}
       alt={`Photo of ${name}`}
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
-      style={{ width: '100%', borderRadius: '8px' }}
     />
   )
 }
 
-function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) {
+function FilterRow({ label, value, options, onChange }) {
+  return (
+    <div className="filters" role="group" aria-label={label}>
+      {options.map(([key, text]) => (
+        <button key={key} className="chip" aria-pressed={value === key} onClick={() => onChange(key)}>
+          {text}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
   const [values, setValues] = useState(initial)
 
   function change(field) {
@@ -107,8 +137,6 @@ function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) 
 
   return (
     <form onSubmit={handleSubmit} className="card">
-      <h2>{title}</h2>
-
       <label htmlFor="name">Name</label>
       <input id="name" value={values.name} onChange={change('name')} maxLength={120} required />
 
@@ -150,16 +178,16 @@ function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) 
             onChange={change('photoLink')}
             maxLength={500}
           />
-          <p className="muted">Right click a photo online and choose Copy image address.</p>
+          <p className="muted small">Right click a photo online and choose Copy image address.</p>
         </>
       )}
 
       <label htmlFor="notes">Notes</label>
       <textarea id="notes" value={values.notes} onChange={change('notes')} maxLength={2000} rows={3} />
 
-      <div className="row-head">
+      <div className="form-actions">
         <button type="submit" disabled={saving}>{saving ? 'Saving...' : submitLabel}</button>
-        {onCancel && <button type="button" onClick={onCancel}>Cancel</button>}
+        {onCancel && <button type="button" className="ghost" onClick={onCancel}>Cancel</button>}
       </div>
     </form>
   )
@@ -259,6 +287,14 @@ export default function App() {
   }
 
   const selected = places.find((p) => p.id === selectedId)
+  const activeNav = view === 'detail' ? returnView : view
+
+  const titles = {
+    home: 'Your places',
+    visited: 'Visited places',
+    add: 'Add a place',
+    detail: editing ? 'Edit place' : 'Place details',
+  }
 
   const visiblePlaces =
     view === 'visited'
@@ -268,131 +304,115 @@ export default function App() {
         )
 
   return (
-    <div className="page">
-      <header>
-        <h1>Yumzys</h1>
-        <p className="lede">Restaurant &amp; café bucket list.</p>
-      </header>
-
-      <DemoNotice />
-
-      <nav className="row-head" style={{ gap: '0.5rem', marginBottom: '1rem' }}>
-        <button onClick={() => setView('home')} disabled={view === 'home'}>Home</button>
-        <button onClick={() => setView('visited')} disabled={view === 'visited'}>Visited</button>
-        <button onClick={() => setView('add')} disabled={view === 'add'}>Add Place</button>
+    <div className="app">
+      <nav className="sidebar" aria-label="Main">
+        <span className="brand">Yumzys</span>
+        {NAV.map(([key, label]) => (
+          <button
+            key={key}
+            className="nav-item"
+            aria-current={activeNav === key ? 'page' : undefined}
+            onClick={() => setView(key)}
+          >
+            {label}
+          </button>
+        ))}
       </nav>
 
-      {error && (
-        <p className="error" role="alert">
-          {error.message} <button onClick={load}>Try again</button>
-        </p>
-      )}
+      <main className="content">
+        <h1>{titles[view]}</h1>
 
-      {view === 'add' && (
-        <PlaceForm
-          title="Add a place"
-          initial={EMPTY_FORM}
-          saving={saving}
-          submitLabel="Save place"
-          onSubmit={handleCreate}
-        />
-      )}
+        <DemoNotice />
 
-      {view === 'detail' && selected && (
-        <>
-          <button onClick={() => setView(returnView)}>Back</button>
-          {editing ? (
-            <PlaceForm
-              key={selected.id}
-              title="Edit place"
-              initial={{ ...selected, rating: selected.rating ?? 4, photoLink: selected.photos?.[0] ?? '' }}
-              saving={saving}
-              submitLabel="Save changes"
-              onSubmit={handleUpdate}
-              onCancel={() => setEditing(false)}
-            />
-          ) : (
-            <article className="card">
-              <PlacePhoto url={selected.photos?.[0]} name={selected.name} />
-              <div className="row-head">
-                <h2>{selected.name}</h2>
-                {selected.status === 'visited' ? (
-                  <Stars value={selected.rating} />
-                ) : (
-                  <span className="muted">Want to try</span>
-                )}
-              </div>
-              <p className="muted">{selected.type} · {selected.area}</p>
-              <p>{selected.notes || 'No notes yet.'}</p>
-              <footer>
-                <button onClick={() => setEditing(true)}>Edit</button>
-                <button
-                  onClick={() => {
-                    handleDelete(selected.id)
-                    setView(returnView)
-                  }}
-                >
-                  Delete
-                </button>
-              </footer>
-            </article>
-          )}
-        </>
-      )}
+        {error && (
+          <p className="error" role="alert">
+            {error.message} <button className="ghost" onClick={load}>Try again</button>
+          </p>
+        )}
 
-      {(view === 'home' || view === 'visited') && (
-        <>
-          {view === 'home' && (
-            <>
-              <div className="row-head" style={{ gap: '0.5rem', marginBottom: '1rem' }}>
-                <button onClick={() => setFilter('all')} disabled={filter === 'all'}>All statuses</button>
-                <button onClick={() => setFilter('want_to_try')} disabled={filter === 'want_to_try'}>Want to Try</button>
-                <button onClick={() => setFilter('visited')} disabled={filter === 'visited'}>Visited</button>
-              </div>
+        {view === 'add' && (
+          <PlaceForm initial={EMPTY_FORM} saving={saving} submitLabel="Save place" onSubmit={handleCreate} />
+        )}
 
-              <div className="row-head" style={{ gap: '0.5rem', marginBottom: '1rem' }}>
-                <button onClick={() => setTypeFilter('all')} disabled={typeFilter === 'all'}>All types</button>
-                <button onClick={() => setTypeFilter('restaurant')} disabled={typeFilter === 'restaurant'}>Restaurant</button>
-                <button onClick={() => setTypeFilter('cafe')} disabled={typeFilter === 'cafe'}>Cafe</button>
-              </div>
-            </>
-          )}
+        {view === 'detail' && selected && (
+          <>
+            <button className="ghost" onClick={() => setView(returnView)}>Back</button>
+            {editing ? (
+              <PlaceForm
+                key={selected.id}
+                initial={{ ...selected, rating: selected.rating ?? 4, photoLink: selected.photos?.[0] ?? '' }}
+                saving={saving}
+                submitLabel="Save changes"
+                onSubmit={handleUpdate}
+                onCancel={() => setEditing(false)}
+              />
+            ) : (
+              <article className="card detail">
+                <PlacePhoto url={selected.photos?.[0]} name={selected.name} />
+                <div className="row-head">
+                  <h2>{selected.name}</h2>
+                  <Rating place={selected} />
+                </div>
+                <p className="meta small muted">{selected.type} · {selected.area}</p>
+                <p>{selected.notes || 'No notes yet.'}</p>
+                <footer>
+                  <button onClick={() => setEditing(true)}>Edit</button>
+                  <button
+                    className="ghost"
+                    onClick={() => {
+                      handleDelete(selected.id)
+                      setView(returnView)
+                    }}
+                  >
+                    Delete
+                  </button>
+                </footer>
+              </article>
+            )}
+          </>
+        )}
 
-          {status === 'loading' && (
-            <p className="muted">
-              Loading{slow ? '. The server may be waking up, which can take up to a minute.' : '...'}
-            </p>
-          )}
+        {(view === 'home' || view === 'visited') && (
+          <>
+            {view === 'home' && (
+              <>
+                <FilterRow label="Filter by status" value={filter} options={STATUS_OPTIONS} onChange={setFilter} />
+                <FilterRow label="Filter by type" value={typeFilter} options={TYPE_OPTIONS} onChange={setTypeFilter} />
+              </>
+            )}
 
-          {status === 'ready' && visiblePlaces.length === 0 && (
-            <p className="muted">No places here yet.</p>
-          )}
+            {status === 'loading' && (
+              <p className="muted">
+                Loading{slow ? '. The server may be waking up, which can take up to a minute.' : '...'}
+              </p>
+            )}
 
-          {status === 'ready' && visiblePlaces.length > 0 && (
-            <ul className="list">
-              {visiblePlaces.map((place) => (
-                <li key={place.id} className="card">
-                  <PlacePhoto url={place.photos?.[0]} name={place.name} />
-                  <div className="row-head">
-                    <h3>{place.name}</h3>
-                    {place.status === 'visited' ? (
-                      <Stars value={place.rating} />
-                    ) : (
-                      <span className="muted">Want to try</span>
-                    )}
-                  </div>
-                  <p className="muted">{place.type} · {place.area}</p>
-                  <p className={place.notes ? '' : 'muted'}>{place.notes || 'No notes yet.'}</p>
-                  <footer>
-                    <button onClick={() => openPlace(place)}>Details</button>
-                    <button onClick={() => handleDelete(place.id)}>Delete</button>
-                  </footer>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
+            {status === 'ready' && visiblePlaces.length === 0 && (
+              <p className="muted">No places here yet.</p>
+            )}
+
+            {status === 'ready' && visiblePlaces.length > 0 && (
+              <ul className="list">
+                {visiblePlaces.map((place) => (
+                  <li key={place.id} className="card">
+                    <PlacePhoto url={place.photos?.[0]} name={place.name} />
+                    <div className="row-head">
+                      <h3>{place.name}</h3>
+                      <Rating place={place} />
+                    </div>
+                    <p className="meta small muted">{place.type} · {place.area}</p>
+                    <p className={place.notes ? '' : 'muted'}>{place.notes || 'No notes yet.'}</p>
+                    <footer>
+                      <button className="ghost" onClick={() => openPlace(place)}>Details</button>
+                      <button className="ghost" onClick={() => handleDelete(place.id)}>Delete</button>
+                    </footer>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </main>
     </div>
   )
 }
