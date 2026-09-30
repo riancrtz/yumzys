@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listPlaces, createPlace, deletePlace, NEEDS_LOGIN, setCredentials } from './api'
+import { listPlaces, createPlace, deletePlace, listPhotos, NEEDS_LOGIN, setCredentials } from './api'
 import DemoNotice from './components/DemoNotice.jsx'
 
 const EMPTY_FORM = { name: '', type: 'restaurant', area: '', status: 'want_to_try', rating: 4, notes: '' }
@@ -43,6 +43,12 @@ function LoginScreen({ onLogin }) {
   )
 }
 
+function pickPhoto(list, id) {
+  if (list.length === 0) return null
+  const seed = [...String(id)].reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return list[seed % list.length]
+}
+
 export default function App() {
   const [authed, setAuthed] = useState(!NEEDS_LOGIN)
   const [status, setStatus] = useState('loading')
@@ -54,6 +60,7 @@ export default function App() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [photos, setPhotos] = useState({ restaurant: [], cafe: [] })
 
   async function load() {
     setStatus('loading')
@@ -75,6 +82,13 @@ export default function App() {
     }
   }
 
+  useEffect(() => {
+  if (!authed) return
+  Promise.all([listPhotos('restaurant'), listPhotos('cafe')])
+    .then(([restaurant, cafe]) => setPhotos({ restaurant, cafe }))
+    .catch(() => {})
+}, [authed])
+  
   useEffect(() => {
     if (authed) load()
   }, [authed])
@@ -259,27 +273,38 @@ const visiblePlaces =
 
           {status === 'ready' && visiblePlaces.length > 0 && (
             <ul className="list">
-              {visiblePlaces.map((place) => (
-                <li key={place.id} className="card">
-                  <div className="row-head">
-                    <h3>{place.name}</h3>
-                    {place.status === 'visited' ? (
-                      <span aria-label={`Rating ${place.rating} of 5`}>
-                        {'★'.repeat(place.rating)}{'☆'.repeat(5 - place.rating)}
-                      </span>
-                    ) : (
-                      <span className="muted">Want to try</span>
+              {visiblePlaces.map((place) => {
+                const photo = pickPhoto(photos[place.type] ?? [], place.id)
+                return (
+                  <li key={place.id} className="card">
+                    {photo && (
+                      <>
+                        <img src={photo.url} alt="" style={{ width: '100%', borderRadius: '8px' }} />
+                        <p className="muted">
+                          Photo by <a href={photo.link} target="_blank" rel="noreferrer">{photo.credit}</a> on Unsplash
+                        </p>
+                      </>
                     )}
-                  </div>
-                  <p className="muted">{place.type} · {place.area}</p>
-                  {place.notes
-                    ? <p>{place.notes}</p>
-                    : <p className="muted">No notes yet.</p>}
-                  <footer>
-                    <button onClick={() => handleDelete(place.id)}>Delete</button>
-                  </footer>
-                </li>
-              ))}
+                    <div className="row-head">
+                      <h3>{place.name}</h3>
+                      {place.status === 'visited' ? (
+                        <span aria-label={`Rating ${place.rating} of 5`}>
+                          {'★'.repeat(place.rating)}{'☆'.repeat(5 - place.rating)}
+                        </span>
+                      ) : (
+                        <span className="muted">Want to try</span>
+                      )}
+                    </div>
+                    <p className="muted">{place.type} · {place.area}</p>
+                    {place.notes
+                      ? <p>{place.notes}</p>
+                      : <p className="muted">No notes yet.</p>}
+                    <footer>
+                      <button onClick={() => handleDelete(place.id)}>Delete</button>
+                    </footer>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </>

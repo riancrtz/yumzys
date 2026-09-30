@@ -128,6 +128,43 @@ app.delete('/api/places/:id', async (request, response, next) => {
   }
 })
 
+const photoCache = new Map()
+
+async function photosFor(type) {
+  if (photoCache.has(type)) return photoCache.get(type)
+
+  const query = type === 'cafe' ? 'cafe coffee' : 'restaurant food'
+  const url =
+    'https://api.unsplash.com/search/photos' +
+    `?query=${encodeURIComponent(query)}&per_page=30&orientation=landscape`
+
+  const result = await fetch(url, {
+    headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` },
+  })
+  if (!result.ok) throw new Error(`Unsplash responded ${result.status}`)
+
+  const body = await result.json()
+  const photos = body.results.map((photo) => ({
+    url: photo.urls.small,
+    credit: photo.user.name,
+    link: photo.user.links.html,
+  }))
+
+  photoCache.set(type, photos)
+  return photos
+}
+
+app.get('/api/photos/:type', async (request, response, next) => {
+  if (!['restaurant', 'cafe'].includes(request.params.type)) {
+    return response.status(400).json({ error: 'type must be restaurant or cafe' })
+  }
+  try {
+    response.json(await photosFor(request.params.type))
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })

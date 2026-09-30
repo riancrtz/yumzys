@@ -70,3 +70,7 @@ export async function deletePlace(id) {
   await delay()
   write(read().filter((row) => String(row.id) !== String(id)))
 }
+
+export async function listPhotos() {
+  return []
+}

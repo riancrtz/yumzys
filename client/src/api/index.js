@@ -11,6 +11,7 @@ export const {
   createPlace,
   updatePlace,
   deletePlace,
+  listPhotos,
 } = implementation
 
 // Demo mode has nothing to log into, so these are no-ops there.
