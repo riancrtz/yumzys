@@ -11,10 +11,8 @@ export const {
   createPlace,
   updatePlace,
   deletePlace,
-  listPhotos,
 } = implementation
 
-// Demo mode has nothing to log into, so these are no-ops there.
 export const NEEDS_LOGIN = !USING_MOCK_API
 export const setCredentials = USING_MOCK_API ? () => {} : httpApi.setCredentials
 export const clearCredentials = USING_MOCK_API ? () => {} : httpApi.clearCredentials

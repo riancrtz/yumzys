@@ -46,11 +46,12 @@ export async function getPlace(id) {
 
 export async function createPlace(input) {
   await delay()
+  const visited = input.status === 'visited'
   const created = {
     ...input,
     id: crypto.randomUUID(),
-    rating: input.status === 'visited' ? input.rating : null,
-    photos: input.photos || [],
+    rating: visited ? input.rating : null,
+    photos: visited ? input.photos || [] : [],
   }
   write([...read(), created])
   return created
@@ -69,8 +70,4 @@ export async function updatePlace(id, input) {
 export async function deletePlace(id) {
   await delay()
   write(read().filter((row) => String(row.id) !== String(id)))
-}
-
-export async function listPhotos() {
-  return []
 }

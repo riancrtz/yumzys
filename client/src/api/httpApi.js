@@ -19,10 +19,7 @@ async function request(path, options) {
     headers.Authorization = 'Basic ' + btoa(`${credentials.username}:${credentials.password}`)
   }
 
-  const response = await fetch(`${BASE}${path}`, {
-    headers,
-    ...options,
-  })
+  const response = await fetch(`${BASE}${path}`, { headers, ...options })
 
   if (response.status === 401) {
     clearCredentials()
@@ -37,7 +34,7 @@ async function request(path, options) {
       const body = await response.json()
       if (body?.error) message = body.error
     } catch {
-      // not JSON
+      message = `${response.status} ${response.statusText}`
     }
     throw new Error(message)
   }
@@ -50,4 +47,3 @@ export const getPlace = (id) => request(`/api/places/${id}`)
 export const createPlace = (input) => request('/api/places', { method: 'POST', body: JSON.stringify(input) })
 export const updatePlace = (id, input) => request(`/api/places/${id}`, { method: 'PUT', body: JSON.stringify(input) })
 export const deletePlace = (id) => request(`/api/places/${id}`, { method: 'DELETE' })
-export const listPhotos = (type) => request(`/api/photos/${type}`)

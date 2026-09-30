@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
-import { listPlaces, createPlace, updatePlace, deletePlace, listPhotos, NEEDS_LOGIN, setCredentials } from './api'
+import { listPlaces, createPlace, updatePlace, deletePlace, NEEDS_LOGIN, setCredentials } from './api'
 import DemoNotice from './components/DemoNotice.jsx'
 
-const EMPTY_FORM = { name: '', type: 'restaurant', area: '', status: 'want_to_try', rating: 4, notes: '' }
+const EMPTY_FORM = {
+  name: '',
+  type: 'restaurant',
+  area: '',
+  status: 'want_to_try',
+  rating: 4,
+  notes: '',
+  photoLink: '',
+}
 
 function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState('')
@@ -38,12 +46,6 @@ function LoginScreen({ onLogin }) {
   )
 }
 
-function pickPhoto(list, id) {
-  if (list.length === 0) return null
-  const seed = [...String(id)].reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return list[seed % list.length]
-}
-
 function Stars({ value }) {
   return (
     <span aria-label={`Rating ${value} of 5`}>
@@ -52,15 +54,32 @@ function Stars({ value }) {
   )
 }
 
-function PlacePhoto({ photo }) {
-  if (!photo) return null
+function PlacePhoto({ url, name }) {
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [url])
+
+  if (!url || failed) {
+    return (
+      <div
+        className="muted"
+        style={{ padding: '2rem', textAlign: 'center', borderRadius: '8px', border: '1px dashed currentColor' }}
+      >
+        No photo yet
+      </div>
+    )
+  }
+
   return (
-    <>
-      <img src={photo.url} alt="" style={{ width: '100%', borderRadius: '8px' }} />
-      <p className="muted">
-        Photo by <a href={photo.link} target="_blank" rel="noreferrer">{photo.credit}</a> on Unsplash
-      </p>
-    </>
+    <img
+      src={url}
+      alt={`Photo of ${name}`}
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      style={{ width: '100%', borderRadius: '8px' }}
+    />
   )
 }
 
@@ -74,6 +93,7 @@ function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) 
   function handleSubmit(event) {
     event.preventDefault()
     if (!values.name.trim()) return
+    const link = values.photoLink.trim()
     onSubmit({
       name: values.name.trim(),
       type: values.type,
@@ -81,6 +101,7 @@ function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) 
       status: values.status,
       rating: values.status === 'visited' ? Number(values.rating) : null,
       notes: values.notes.trim(),
+      photos: values.status === 'visited' && link ? [link] : [],
     })
   }
 
@@ -117,6 +138,19 @@ function PlaceForm({ title, initial, saving, submitLabel, onSubmit, onCancel }) 
             value={values.rating}
             onChange={change('rating')}
           />
+
+          <label htmlFor="photo-link">Photo link (optional)</label>
+          <input
+            id="photo-link"
+            type="url"
+            pattern="https://.+"
+            title="The link must start with https://"
+            placeholder="https://..."
+            value={values.photoLink}
+            onChange={change('photoLink')}
+            maxLength={500}
+          />
+          <p className="muted">Right click a photo online and choose Copy image address.</p>
         </>
       )}
 
@@ -144,7 +178,6 @@ export default function App() {
   const [filter, setFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
   const [saving, setSaving] = useState(false)
-  const [photos, setPhotos] = useState({ restaurant: [], cafe: [] })
 
   async function load() {
     setStatus('loading')
@@ -170,13 +203,6 @@ export default function App() {
     if (authed) load()
   }, [authed])
 
-  useEffect(() => {
-    if (!authed) return
-    Promise.all([listPhotos('restaurant'), listPhotos('cafe')])
-      .then(([restaurant, cafe]) => setPhotos({ restaurant, cafe }))
-      .catch(() => {})
-  }, [authed])
-
   function fail(caught) {
     if (caught.isAuthError) setAuthed(false)
     else setError(caught)
@@ -191,8 +217,9 @@ export default function App() {
 
   async function handleCreate(values) {
     setSaving(true)
+    setError(null)
     try {
-      const created = await createPlace({ ...values, photos: [] })
+      const created = await createPlace(values)
       setPlaces([created, ...places])
       setView('home')
     } catch (caught) {
@@ -204,8 +231,9 @@ export default function App() {
 
   async function handleUpdate(values) {
     setSaving(true)
+    setError(null)
     try {
-      const updated = await updatePlace(selected.id, { ...values, photos: selected.photos ?? [] })
+      const updated = await updatePlace(selected.id, values)
       setPlaces(places.map((p) => (p.id === updated.id ? updated : p)))
       setEditing(false)
     } catch (caught) {
@@ -277,7 +305,7 @@ export default function App() {
             <PlaceForm
               key={selected.id}
               title="Edit place"
-              initial={{ ...selected, rating: selected.rating ?? 4 }}
+              initial={{ ...selected, rating: selected.rating ?? 4, photoLink: selected.photos?.[0] ?? '' }}
               saving={saving}
               submitLabel="Save changes"
               onSubmit={handleUpdate}
@@ -285,7 +313,7 @@ export default function App() {
             />
           ) : (
             <article className="card">
-              <PlacePhoto photo={pickPhoto(photos[selected.type] ?? [], selected.id)} />
+              <PlacePhoto url={selected.photos?.[0]} name={selected.name} />
               <div className="row-head">
                 <h2>{selected.name}</h2>
                 {selected.status === 'visited' ? (
@@ -344,7 +372,7 @@ export default function App() {
             <ul className="list">
               {visiblePlaces.map((place) => (
                 <li key={place.id} className="card">
-                  <PlacePhoto photo={pickPhoto(photos[place.type] ?? [], place.id)} />
+                  <PlacePhoto url={place.photos?.[0]} name={place.name} />
                   <div className="row-head">
                     <h3>{place.name}</h3>
                     {place.status === 'visited' ? (
@@ -368,4 +396,3 @@ export default function App() {
     </div>
   )
 }
-

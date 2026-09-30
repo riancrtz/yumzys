@@ -19,12 +19,10 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
 
-// Is the process alive?
 app.get('/healthz', (request, response) => {
   response.json({ ok: true })
 })
 
-// Is the database reachable?
 app.get('/readyz', async (request, response) => {
   try {
     await pool.query('SELECT 1')
@@ -35,8 +33,6 @@ app.get('/readyz', async (request, response) => {
   }
 })
 
-// HTTP Basic Auth, protects every route below this line. healthz/readyz above
-// stay open so hosting dashboards can check the app is alive without a login.
 function basicAuth(request, response, next) {
   const auth = request.headers.authorization
   if (!auth || !auth.startsWith('Basic ')) {
@@ -53,7 +49,6 @@ function basicAuth(request, response, next) {
 
 app.use(basicAuth)
 
-// Validation lives on the server because the client can be bypassed.
 function validate(body) {
   const errors = []
   const name = typeof body.name === 'string' ? body.name.trim() : ''
@@ -61,7 +56,7 @@ function validate(body) {
   const area = typeof body.area === 'string' ? body.area.trim() : ''
   const status = typeof body.status === 'string' ? body.status.trim() : 'want_to_try'
   const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
-  const photos = Array.isArray(body.photos) ? body.photos : []
+  const links = Array.isArray(body.photos) ? body.photos : []
   const rating = body.rating === null || body.rating === undefined ? null : Number(body.rating)
 
   if (!name) errors.push('name is required')
@@ -72,6 +67,12 @@ function validate(body) {
   if (rating !== null && (!Number.isInteger(rating) || rating < 1 || rating > 5)) {
     errors.push('rating must be a whole number from 1 to 5')
   }
+  if (links.length > 5) errors.push('photos can hold at most 5 links')
+  if (!links.every((link) => typeof link === 'string' && link.length <= 500 && link.startsWith('https://'))) {
+    errors.push('photo links must start with https:// and be 500 characters or fewer')
+  }
+
+  const photos = status === 'visited' ? links : []
 
   return { errors, value: { name, type, area, status, rating, notes, photos } }
 }
@@ -123,43 +124,6 @@ app.delete('/api/places/:id', async (request, response, next) => {
     const removed = await places.remove(pool, request.params.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
     response.status(204).end()
-  } catch (error) {
-    next(error)
-  }
-})
-
-const photoCache = new Map()
-
-async function photosFor(type) {
-  if (photoCache.has(type)) return photoCache.get(type)
-
-  const query = type === 'cafe' ? 'cafe coffee' : 'restaurant food'
-  const url =
-    'https://api.unsplash.com/search/photos' +
-    `?query=${encodeURIComponent(query)}&per_page=30&orientation=landscape`
-
-  const result = await fetch(url, {
-    headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` },
-  })
-  if (!result.ok) throw new Error(`Unsplash responded ${result.status}`)
-
-  const body = await result.json()
-  const photos = body.results.map((photo) => ({
-    url: photo.urls.small,
-    credit: photo.user.name,
-    link: photo.user.links.html,
-  }))
-
-  photoCache.set(type, photos)
-  return photos
-}
-
-app.get('/api/photos/:type', async (request, response, next) => {
-  if (!['restaurant', 'cafe'].includes(request.params.type)) {
-    return response.status(400).json({ error: 'type must be restaurant or cafe' })
-  }
-  try {
-    response.json(await photosFor(request.params.type))
   } catch (error) {
     next(error)
   }
