@@ -3,9 +3,7 @@
 This project was built with AI assistance. This file is the record of it. It is
 graded as the finals badge, and it is worth 100 points.
 
-Entry dates are the dates of the work. This file was started on 2026-09-26, so
-entries dated before that were written afterward. Entries from 2026-09-26 on
-were added as the work happened.
+Entry dates are the dates of the work. This file was started on 2026-09-26, and the entries dated 2026-09-19 to 2026-09-23 were written then, after the work. The later entries were added on 2026-10-01 or afterward, so some were written several days after the work. The commit history of this file shows when each was added.
 
 ## 1. How I used AI
 
@@ -65,12 +63,19 @@ were added as the work happened.
 - **What I kept, what I changed, and why:** Kept the whole approach, since testing confirmed it worked correctly across regular and incognito windows, which the previous approach did not.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/7c3d1a8
 
-### 2026-09-26 - Writing the README to match the documentation guide
+### 2026-09-26 to 2026-10-01 - Writing the README to match the documentation guide
 - **Tool:** Claude
 - **What I asked for:** Help writing the README so it follows my professor's documentation guide: overview, setup, how to run it, features, structure, screenshots, and known issues.
 - **What it gave back:** A README organized in those seven sections, with environment variable tables, an API endpoint list, and a credit line pointing to this file.
 - **What I kept, what I changed, and why:** I kept the section structure and edited the text to match what I actually built. I kept my login credentials out of this public README. After I renamed the repository to yumzys, I updated every link in commit 9b145ed (https://github.com/riancrtz/yumzys/commit/9b145ed).
 - **Commit:** https://github.com/riancrtz/yumzys/commit/7c84883
+
+### 2026-09-19 to 2026-09-27 - Weekly reports, journals and the security checklist
+- **Tool:** Claude
+- **What I asked for:** Drafts of my week 1 and week 2 increment reports and journals, and the 31 row security checklist, for my private workspace.
+- **What it gave back:** Drafts based on the work we did together, with evidence lines for each checklist row.
+- **What I kept, what I changed, and why:** I ran the checks myself, such as the git history searches and the secret scanning settings, and corrected rows that did not match what I built. These files are in my private workspace, so their commits are not in this repository.
+- **Commit:** Not in this repository. The files are in my private workspace.
 
 ### 2026-09-30 - Showing Unsplash photos on place cards
 - **Tool:** Claude
@@ -106,6 +111,27 @@ were added as the work happened.
 - **What it gave back:** A small module that shrinks a photo in the browser and uploads it to Cloudinary with an unsigned preset, a file picker in the form, and the two new build variables in the deploy workflow.
 - **What I kept, what I changed, and why:** I created the Cloudinary account and the unsigned preset myself, with a folder and an allowed formats list, and tested the upload locally. The returned link goes into the existing photos field, so the server and database did not change.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/5702831
+
+### 2026-10-01 - Writing a message for a failed login
+- **Tool:** Claude
+- **What I asked for:** After I added the photo features, my login screen just returned to the form after a wrong password with no message. I asked how to show one.
+- **What it gave back:** An outline of the approach only: a flag in `App`, a prop to `LoginScreen`, and a message there. I wrote the code myself. When I pasted it back, it pointed out that a comment I left inside the JSX would show up as text on the screen.
+- **What I kept, what I changed, and why:** I removed the stray comment text and all my "added" comments, then tested a wrong and a right password.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/340cfab
+
+### 2026-10-01 - Checking the login before leaving the login screen
+- **Tool:** Claude
+- **What I asked for:** My message worked, but the whole page flashed for a moment each time a wrong password was entered, and the username I typed was wiped.
+- **What it gave back:** A new `LoginScreen` that sends one request to check the credentials first, stays on the login screen when the password is wrong, and separates a wrong password from a server that is down or asleep. It also removed the flag from `App`.
+- **What I kept, what I changed, and why:** I kept all of it and tested three cases: a wrong password, a right password, and the server stopped. I saw "Failed to fetch" in the last case, which is the right result.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
+
+### 2026-10-01 - Asking for confirmation before deleting
+- **Tool:** Claude
+- **What I asked for:** One click on Delete removed a place for good, so I asked how to add a confirmation.
+- **What it gave back:** The idea of using the browser's built in confirm, and a warning about one trap: the detail page runs the delete and then returns to the list, so a cancel must stop both steps. It gave no code.
+- **What I kept, what I changed, and why:** I wrote the code myself: a small helper that asks the question and returns true or false, checked separately in the list button and the detail button. I tested cancel and confirm from both screens.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/94f2d03
 
 ## 2. Where the AI got it wrong
 
@@ -151,14 +177,27 @@ were added as the work happened.
 - **What I did instead:** I read my own preset list, made a separate `yumzys_unsigned` preset, and found the allowed formats field myself.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/5702831
 
+### Case 8 - A login message that made the whole page flash
+- **What it gave me:** A design where `App` shows the whole app as soon as the login form is submitted, and only goes back to the login screen if the server answers 401, with a flag in `App` to show the message.
+- **What was wrong with it:** The message worked, but every wrong password made the entire page flash for the length of one request, and the typed username was lost. I noticed it while testing.
+- **What I did instead:** I asked for a fix, and the check moved inside the login screen, so the app only appears after the server accepts the login.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
+
 ## 3. Who wrote what
 
 ### Written by me
-- **File:** `client/src/App.jsx` (the type filter feature)
+- **File:** `client/src/App.jsx` (the type filter)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/4b45bd1
-- **What it does and why it is built this way:** Added a second filter, by place type (Restaurant/Cafe), alongside the existing status filter (All/Want to Try/Visited) on the Home screen. I added a new `typeFilter` state, a new row of filter buttons following the same pattern as the existing status filter, and updated the `visiblePlaces` logic to check both filters together using `&&`, so a place only shows if it matches both the selected status and the selected type. I wrote this by studying the existing status filter's pattern first, then extending it myself rather than having it written for me.
+- **What it does and why it is built this way:** The Home screen already had a status filter (All, Want to try, Visited). I added a second filter by type (Restaurant or Cafe) next to it. I added a `typeFilter` state, a second row of buttons that follows the same pattern as the first, and changed `visiblePlaces` so a place only shows if it matches both filters, using `&&`. I also simplified the status check to `filter === 'all' || p.status === filter`, so it needs one `filter` call and not a three way ternary. The two filters work together because each one is its own piece of state. During the design system pass, Claude replaced my button rows with a shared `FilterRow` component. The `typeFilter` state and the `visiblePlaces` condition are still the code I wrote.
+
+### Written by me
+- **File:** `client/src/App.jsx` (the delete confirmation)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/94f2d03
+- **What it does and why it is built this way:** Before, one click on Delete removed a place for good. Now a small helper, `confirmDelete`, asks "Delete (place name)?" with the browser's `confirm` and returns true or false. Each Delete button checks it in its own click handler. I did not put the question inside `handleDelete` because the detail page's button calls `handleDelete` and then `setView(returnView)`. With the question inside, cancelling would still have sent me back to the list. Checking it in each button means cancelling does nothing at all, and I tested cancel and confirm from both the list and the detail page.
 
 ### The AI-written part I understand best
-- **File:** `client/src/App.jsx`
-- **Commit:** https://github.com/riancrtz/yumzys/commit/7c3d1a8
-- **What it does and why we kept it:** This is the main app component, it handles the login screen and switches between the Home, Visited, and Add Place views using local state. I understand this file well because I debugged a blank white screen caused by a leftover import here early on, and later needed to understand exactly how the login screen's `authed` state worked so I could explain why it fixed the incognito login problem we ran into.
+- **File:** `client/src/App.jsx` (`LoginScreen`)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
+- **What it does and why we kept it:** `LoginScreen` checks the credentials before leaving the login screen. On submit it saves them with `setCredentials`, then calls `listPlaces()`, and only calls `onLogin()` if that works. A 401 shows "Invalid username or password.", and any other error, like a server that is down or asleep, shows that error's own message. My first version let `App` show the whole app as soon as I submitted and return to the login screen after the 401. That made the page flash and wiped the username I typed. Checking inside `LoginScreen` fixed both, and I tested a wrong password, a right password, and the server stopped.
+
+My own code is a small share of the project. The type filter added 26 lines and the delete confirmation added 13, so 39 added lines in total, out of 1,061 lines of application source (JavaScript, JSX, CSS and SQL, not counting dependencies). That is about 4 percent, well under a fifth. The rest was written by Claude or came from the class template, and I tested, deployed and debugged it.
