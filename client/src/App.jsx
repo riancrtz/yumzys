@@ -31,14 +31,24 @@ const TYPE_OPTIONS = [
   ['cafe', 'Cafe'],
 ]
 
-function LoginScreen({ onLogin, loginFailed }) { 
+function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [message, setMessage] = useState(null)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    setChecking(true)
+    setMessage(null)
     setCredentials(username, password)
-    onLogin()
+    try {
+      await listPlaces()
+      onLogin()
+    } catch (caught) {
+      setMessage(caught.isAuthError ? 'Invalid username or password.' : caught.message)
+      setChecking(false)
+    }
   }
 
   return (
@@ -47,9 +57,9 @@ function LoginScreen({ onLogin, loginFailed }) {
       <p className="muted">Restaurant &amp; café bucket list.</p>
       <form onSubmit={handleSubmit} className="card">
         <h2>Log in</h2>
-        {loginFailed && (
-          <p className="error" role="alert"> 
-             Invalid username or password.
+        {message && (
+          <p className="error" role="alert">
+            {message}
           </p>
         )}
         <label htmlFor="username">Username</label>
@@ -63,7 +73,7 @@ function LoginScreen({ onLogin, loginFailed }) {
           required
         />
         <div className="form-actions">
-          <button type="submit">Log in</button>
+          <button type="submit" disabled={checking}>{checking ? 'Logging in...' : 'Log in'}</button>
         </div>
       </form>
     </main>
@@ -231,7 +241,6 @@ function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
 
 export default function App() {
   const [authed, setAuthed] = useState(!NEEDS_LOGIN)
-  const [loginFailed, setLoginFailed] = useState(false) 
   const [status, setStatus] = useState('loading')
   const [places, setPlaces] = useState([])
   const [error, setError] = useState(null)
@@ -254,7 +263,6 @@ export default function App() {
     } catch (caught) {
       if (caught.isAuthError) {
         setAuthed(false)
-        setLoginFailed(true) 
       } else {
         setError(caught)
         setStatus('error')
@@ -321,15 +329,7 @@ export default function App() {
   }
 
   if (!authed) {
-    return (
-      <LoginScreen
-        onLogin={() => {
-          setLoginFailed(false)
-          setAuthed(true)
-        }}                                  
-        loginFailed={loginFailed}
-      />
-    )
+    return <LoginScreen onLogin={() => setAuthed(true)} />
   }
 
   const selected = places.find((p) => p.id === selectedId)
