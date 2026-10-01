@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listPlaces, createPlace, updatePlace, deletePlace, NEEDS_LOGIN, setCredentials } from './api'
+import { UPLOADS_ENABLED, uploadPhoto } from './uploadPhoto.js'
 import DemoNotice from './components/DemoNotice.jsx'
 
 const EMPTY_FORM = {
@@ -9,7 +10,7 @@ const EMPTY_FORM = {
   status: 'want_to_try',
   rating: 4,
   notes: '',
-  photoLink: '',
+  photoUrl: '',
 }
 
 const NAV = [
@@ -115,15 +116,33 @@ function FilterRow({ label, value, options, onChange }) {
 
 function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
   const [values, setValues] = useState(initial)
+  const [uploading, setUploading] = useState(false)
+  const [photoError, setPhotoError] = useState(null)
 
   function change(field) {
     return (event) => setValues({ ...values, [field]: event.target.value })
   }
 
+  async function handleFile(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    setUploading(true)
+    setPhotoError(null)
+    try {
+      const url = await uploadPhoto(file)
+      setValues((current) => ({ ...current, photoUrl: url }))
+    } catch (caught) {
+      setPhotoError(caught.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
   function handleSubmit(event) {
     event.preventDefault()
     if (!values.name.trim()) return
-    const link = values.photoLink.trim()
     onSubmit({
       name: values.name.trim(),
       type: values.type,
@@ -131,7 +150,7 @@ function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
       status: values.status,
       rating: values.status === 'visited' ? Number(values.rating) : null,
       notes: values.notes.trim(),
-      photos: values.status === 'visited' && link ? [link] : [],
+      photos: values.status === 'visited' && values.photoUrl ? [values.photoUrl] : [],
     })
   }
 
@@ -167,18 +186,30 @@ function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
             onChange={change('rating')}
           />
 
-          <label htmlFor="photo-link">Photo link (optional)</label>
-          <input
-            id="photo-link"
-            type="url"
-            pattern="https://.+"
-            title="The link must start with https://"
-            placeholder="https://..."
-            value={values.photoLink}
-            onChange={change('photoLink')}
-            maxLength={500}
-          />
-          <p className="muted small">Right click a photo online and choose Copy image address.</p>
+          <label htmlFor="photo-file">Photo (optional)</label>
+          {values.photoUrl && <PlacePhoto url={values.photoUrl} name={values.name || 'this place'} />}
+          {UPLOADS_ENABLED ? (
+            <input
+              id="photo-file"
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              disabled={uploading}
+            />
+          ) : (
+            <p className="muted small">Photo upload is not set up in this build.</p>
+          )}
+          {uploading && <p className="muted small">Uploading...</p>}
+          {photoError && <p className="error" role="alert">{photoError}</p>}
+          {values.photoUrl && !uploading && (
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setValues({ ...values, photoUrl: '' })}
+            >
+              Remove photo
+            </button>
+          )}
         </>
       )}
 
@@ -186,7 +217,7 @@ function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
       <textarea id="notes" value={values.notes} onChange={change('notes')} maxLength={2000} rows={3} />
 
       <div className="form-actions">
-        <button type="submit" disabled={saving}>{saving ? 'Saving...' : submitLabel}</button>
+        <button type="submit" disabled={saving || uploading}>{saving ? 'Saving...' : submitLabel}</button>
         {onCancel && <button type="button" className="ghost" onClick={onCancel}>Cancel</button>}
       </div>
     </form>
@@ -340,7 +371,7 @@ export default function App() {
             {editing ? (
               <PlaceForm
                 key={selected.id}
-                initial={{ ...selected, rating: selected.rating ?? 4, photoLink: selected.photos?.[0] ?? '' }}
+                initial={{ ...selected, rating: selected.rating ?? 4, photoUrl: selected.photos?.[0] ?? '' }}
                 saving={saving}
                 submitLabel="Save changes"
                 onSubmit={handleUpdate}

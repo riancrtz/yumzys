@@ -87,6 +87,8 @@ jobs:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_USE_MOCK_API: ${{ vars.VITE_USE_MOCK_API }}
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_CLOUDINARY_CLOUD_NAME: ${{ vars.VITE_CLOUDINARY_CLOUD_NAME }}
+          VITE_CLOUDINARY_UPLOAD_PRESET: ${{ vars.VITE_CLOUDINARY_UPLOAD_PRESET }}
         # npm run build also copies index.html to 404.html. GitHub Pages serves
         # 404.html for any path it cannot find, which is how a single-page app
         # survives someone refreshing on a nested route.
