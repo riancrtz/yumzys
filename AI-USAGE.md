@@ -3,6 +3,10 @@
 This project was built with AI assistance. This file is the record of it. It is
 graded as the finals badge, and it is worth 100 points.
 
+Entry dates are the dates of the work. This file was started on 2026-09-26, so
+entries dated before that were written afterward. Entries from 2026-09-26 on
+were added as the work happened.
+
 ## 1. How I used AI
 
 ### 2026-09-19 - Setting up GitHub Pages deployment
@@ -61,6 +65,48 @@ graded as the finals badge, and it is worth 100 points.
 - **What I kept, what I changed, and why:** Kept the whole approach, since testing confirmed it worked correctly across regular and incognito windows, which the previous approach did not.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/7c3d1a8
 
+### 2026-09-26 - Writing the README to match the documentation guide
+- **Tool:** Claude
+- **What I asked for:** Help writing the README so it follows my professor's documentation guide: overview, setup, how to run it, features, structure, screenshots, and known issues.
+- **What it gave back:** A README organized in those seven sections, with environment variable tables, an API endpoint list, and a credit line pointing to this file.
+- **What I kept, what I changed, and why:** I kept the section structure and edited the text to match what I actually built. I kept my login credentials out of this public README. After I renamed the repository to yumzys, I updated every link in commit 9b145ed (https://github.com/riancrtz/yumzys/commit/9b145ed).
+- **Commit:** https://github.com/riancrtz/yumzys/commit/7c84883
+
+### 2026-09-30 - Showing Unsplash photos on place cards
+- **Tool:** Claude
+- **What I asked for:** My professor suggested places should show pictures even when I have not uploaded one. I asked how to add photos automatically.
+- **What it gave back:** A comparison of three options (static placeholders, Unsplash, Google Places), then an Express route that fetched photos from Unsplash by place type and cached them, plus client code that picked one photo per place.
+- **What I kept, what I changed, and why:** I chose Unsplash and got it working, with the API key kept on the server. The photos were matched by place type, not the actual place, so cards showed random restaurants. I removed the route and the client code in a later commit (https://github.com/riancrtz/yumzys/commit/805cd7a).
+- **Commit:** https://github.com/riancrtz/yumzys/commit/181a16d
+
+### 2026-10-01 - Place Detail screen with edit
+- **Tool:** Claude
+- **What I asked for:** A screen to view and edit one place, since places could only be added or deleted before.
+- **What it gave back:** A full rewrite of `App.jsx` with a detail view, an edit mode, and one shared form used by both the add and edit screens.
+- **What I kept, what I changed, and why:** I kept the shared form so add and edit stay consistent. When I pasted the first version in, my old import line was still there without `updatePlace`, so saving an edit failed with "updatePlace is not defined." I found the cause from the error on screen and fixed the import myself.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/2ab0f2c
+
+### 2026-10-01 - Replacing Unsplash with a photo link
+- **Tool:** Claude
+- **What I asked for:** After dropping Unsplash, a way to attach a photo to a visited place.
+- **What it gave back:** A photo link field on the form for visited places only, server validation that every link starts with https and is 500 characters or fewer, and a "No photo yet" box for places without a photo.
+- **What I kept, what I changed, and why:** I kept the rule that only visited places can have a photo. I tested a good image link, a normal web page link, and an http link in the browser, and checked how the page reacts to each.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/805cd7a
+
+### 2026-10-01 - Applying the design system
+- **Tool:** Claude
+- **What I asked for:** Restyle the app with my design system: my five colors, type scale, 8px spacing, a sidebar on desktop, and one column on phones.
+- **What it gave back:** A new `styles.css` and a matching rewrite of `App.jsx` with a sidebar, filter buttons, and a card grid.
+- **What I kept, what I changed, and why:** I kept the palette and layout. After testing, I reported that the nav labels looked off and the content looked smaller than my wireframe. We removed the left alignment on the labels and undid a width cap that had shrunk the layout.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/277283d
+
+### 2026-10-01 - Photo upload with Cloudinary
+- **Tool:** Claude
+- **What I asked for:** Real photo upload, because a personal log needs my own photos from the visit, not links to other people's pictures.
+- **What it gave back:** A small module that shrinks a photo in the browser and uploads it to Cloudinary with an unsigned preset, a file picker in the form, and the two new build variables in the deploy workflow.
+- **What I kept, what I changed, and why:** I created the Cloudinary account and the unsigned preset myself, with a folder and an allowed formats list, and tested the upload locally. The returned link goes into the existing photos field, so the server and database did not change.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/5702831
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -80,6 +126,30 @@ graded as the finals badge, and it is worth 100 points.
 - **What was wrong with it:** This was a workaround for the native-popup approach, which itself turned out to be the wrong direction (see Case 2). Once I switched to the in-app login screen, this CORS setting was no longer needed and just widened what cross-origin requests the server would accept unnecessarily.
 - **What I did instead:** Removed `credentials: true` from the CORS config once the in-app login screen replaced the native-auth approach entirely.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/7c3d1a8
+
+### Case 4 - A photo option that did not fit the app
+- **What it gave me:** It described Unsplash as "real-ish photos" and helped me build it. Earlier in the setup it also told me to share my API key in the chat.
+- **What was wrong with it:** The photos did not match the actual places. Sharing an API key in a chat is also wrong, since keys belong only in `.env` and the hosting dashboard. It corrected the key advice in its next message.
+- **What I did instead:** I removed Unsplash and used a photo link on visited places, then moved to real upload. The key never went into the repository.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/805cd7a
+
+### Case 5 - Design choices that needed fixing
+- **What it gave me:** A design system with white text on the terracotta button, and later a layout change that centered the content and made it narrow.
+- **What was wrong with it:** White on #D08549 is about 2.9 to 1, below the 4.5 to 1 my own accessibility checklist promises. The centering made the app look smaller than my wireframe.
+- **What I did instead:** The app uses dark brown text on the buttons, and I removed the width cap after seeing the result on screen.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/277283d
+
+### Case 6 - A photo box that stayed broken
+- **What it gave me:** A photo component that showed "No photo yet" after an image failed to load.
+- **What was wrong with it:** The failed state never reset. After one bad link, the box stayed on "No photo yet" even after I saved a good link, until I refreshed the page. It found this while I was testing the link field.
+- **What I did instead:** I used the corrected version, which resets the failed state whenever the link changes.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/805cd7a
+
+### Case 7 - Wrong guesses about Cloudinary
+- **What it gave me:** While setting up Cloudinary it said Neon cannot store image files and guessed that the default `ml_default` preset was signed.
+- **What was wrong with it:** A Postgres database can technically hold images, though it is a poor fit. And my preset list showed that `ml_default` was unsigned. It also could not tell me where the allowed formats setting was in the console.
+- **What I did instead:** I read my own preset list, made a separate `yumzys_unsigned` preset, and found the allowed formats field myself.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/5702831
 
 ## 3. Who wrote what
 
