@@ -31,7 +31,7 @@ const TYPE_OPTIONS = [
   ['cafe', 'Cafe'],
 ]
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, loginFailed }) { 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -47,6 +47,11 @@ function LoginScreen({ onLogin }) {
       <p className="muted">Restaurant &amp; café bucket list.</p>
       <form onSubmit={handleSubmit} className="card">
         <h2>Log in</h2>
+        {loginFailed && (
+          <p className="error" role="alert"> 
+             Invalid username or password.
+          </p>
+        )}
         <label htmlFor="username">Username</label>
         <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
         <label htmlFor="password">Password</label>
@@ -226,6 +231,7 @@ function PlaceForm({ initial, saving, submitLabel, onSubmit, onCancel }) {
 
 export default function App() {
   const [authed, setAuthed] = useState(!NEEDS_LOGIN)
+  const [loginFailed, setLoginFailed] = useState(false) 
   const [status, setStatus] = useState('loading')
   const [places, setPlaces] = useState([])
   const [error, setError] = useState(null)
@@ -248,6 +254,7 @@ export default function App() {
     } catch (caught) {
       if (caught.isAuthError) {
         setAuthed(false)
+        setLoginFailed(true) 
       } else {
         setError(caught)
         setStatus('error')
@@ -314,7 +321,15 @@ export default function App() {
   }
 
   if (!authed) {
-    return <LoginScreen onLogin={() => setAuthed(true)} />
+    return (
+      <LoginScreen
+        onLogin={() => {
+          setLoginFailed(false)
+          setAuthed(true)
+        }}                                  
+        loginFailed={loginFailed}
+      />
+    )
   }
 
   const selected = places.find((p) => p.id === selectedId)
