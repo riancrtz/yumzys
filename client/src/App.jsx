@@ -328,6 +328,10 @@ export default function App() {
     }
   }
 
+  function confirmDelete(place) {
+  return window.confirm(`Delete ${place.name}?`)
+}
+
   if (!authed) {
     return <LoginScreen onLogin={() => setAuthed(true)} />
   }
@@ -406,6 +410,7 @@ export default function App() {
                   <button
                     className="ghost"
                     onClick={() => {
+                      if (!confirmDelete(selected)) return
                       handleDelete(selected.id)
                       setView(returnView)
                     }}
@@ -450,7 +455,14 @@ export default function App() {
                     <p className={place.notes ? '' : 'muted'}>{place.notes || 'No notes yet.'}</p>
                     <footer>
                       <button className="ghost" onClick={() => openPlace(place)}>Details</button>
-                      <button className="ghost" onClick={() => handleDelete(place.id)}>Delete</button>
+                      <button
+                        className="ghost"
+                        onClick={() => {
+                          if (confirmDelete(place)) handleDelete(place.id)
+                        }}
+                      >
+                        Delete
+                      </button>
                     </footer>
                   </li>
                 ))}
