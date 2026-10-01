@@ -2,7 +2,7 @@
 
 [![Made with AI](https://img.shields.io/badge/Made_with-AI_assistance-blue)](AI-USAGE.md)
 
-Live site: https://riancrtz.github.io/yumzys-final-project-template/
+Live site: https://riancrtz.github.io/yumzys/
 API: https://yumzys-api.onrender.com
 Demo video: (link, added in Week 3)
 
@@ -33,8 +33,8 @@ on memory or scattered chat messages.
 
 **Get the code:**
 
-    git clone https://github.com/riancrtz/yumzys-final-project-template.git
-    cd yumzys-final-project-template
+    git clone https://github.com/riancrtz/yumzys.git
+    cd yumzys
 
 **Install dependencies** (client and server are separate):
 
