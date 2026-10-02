@@ -35,14 +35,21 @@ app.get('/readyz', async (request, response) => {
 
 function basicAuth(request, response, next) {
   const auth = request.headers.authorization
+
   if (!auth || !auth.startsWith('Basic ')) {
     response.set('WWW-Authenticate', 'Basic')
     return response.status(401).send('Authentication required')
   }
-  const [user, pass] = Buffer.from(auth.slice(6), 'base64').toString().split(':')
+
+  const decoded = Buffer.from(auth.slice(6), 'base64').toString()
+  const separator = decoded.indexOf(':')
+  const user = decoded.slice(0, separator)
+  const pass = decoded.slice(separator + 1)
+
   if (user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS) {
     return next()
   }
+
   response.set('WWW-Authenticate', 'Basic')
   return response.status(401).send('Invalid credentials')
 }
