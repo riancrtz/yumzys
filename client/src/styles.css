@@ -1,7 +1,3 @@
-/* Deliberately plain. Module 3 covered styling in React properly: CSS modules,
-   Tailwind, styled-components, a component library. Replace this with whichever
-   you chose and can defend. */
-
 :root {
   color-scheme: light;
 
@@ -82,26 +78,22 @@ button:hover:not(:disabled) {
 
 button:disabled { opacity: 0.6; cursor: default; }
 
-.ghost, .chip, .nav-item {
+.ghost, .nav-item {
   background: transparent;
   border-color: var(--field-border);
 }
 
 .ghost:hover:not(:disabled),
-.chip:hover:not(:disabled),
 .nav-item:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-primary) 15%, white);
 }
 
-.chip[aria-pressed="true"],
 .nav-item[aria-current="page"] {
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
 
 .nav-item { border-color: transparent; }
-
-.filters { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 
 .card {
   display: flex;
@@ -114,15 +106,6 @@ button:disabled { opacity: 0.6; cursor: default; }
   border-radius: 12px;
   overflow-wrap: anywhere;
 }
-
-.card footer {
-  display: flex;
-  gap: var(--space-1);
-  margin-top: auto;
-  padding-top: var(--space-1);
-}
-
-.detail { max-width: 40rem; }
 
 .list {
   list-style: none;
@@ -148,15 +131,6 @@ button:disabled { opacity: 0.6; cursor: default; }
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: 8px;
-}
-
-.photo-empty {
-  display: grid;
-  place-items: center;
-  background: var(--color-bg);
-  border: 1px dashed var(--field-border);
-  color: var(--muted);
-  font-size: var(--font-size-sm);
 }
 
 .badge {
@@ -232,4 +206,376 @@ input, select, textarea {
   .brand { margin: 0 0 var(--space-2) var(--space-1); }
 
   .list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.gallery {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-1);
+}
+
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.thumb-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 10px;
+}
+
+.thumb-button[aria-current="true"] {
+  border-color: var(--color-primary);
+}
+
+.place-card {
+  position: relative;
+  cursor: pointer;
+}
+
+.place-card:hover {
+  border-color: var(--color-primary);
+}
+
+.card-open {
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.card-open:hover:not(:disabled) {
+  background: transparent;
+}
+
+.card-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+
+.card-open:focus-visible {
+  outline: none;
+}
+
+.card-open:focus-visible::after {
+  outline: 3px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.modal {
+  width: min(36rem, calc(100% - 2 * var(--space-2)));
+  max-height: calc(100% - 2 * var(--space-2));
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.modal-small {
+  width: min(24rem, calc(100% - 2 * var(--space-2)));
+}
+
+.modal::backdrop {
+  background: rgba(43, 36, 32, 0.55);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.modal h2 {
+  overflow-wrap: anywhere;
+}
+
+.type-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.type-chip {
+  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  border-color: var(--color-primary);
+  border-radius: 999px;
+}
+
+.type-chip[aria-pressed="true"] {
+  background: var(--color-primary);
+}
+
+.slides {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.slides-track {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.slides-track > * {
+  flex: 0 0 100%;
+}
+
+.photo.slide {
+  border-radius: 0;
+}
+
+.slides-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--space-1);
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(43, 36, 32, 0.4);
+}
+
+.dot.on {
+  background: var(--color-primary);
+}
+
+.place-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 60rem;
+}
+
+.place-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.place-head .form-actions {
+  margin-top: 0;
+}
+
+.place-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.hero {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.facts dt {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.pill {
+  padding: 2px var(--space-1);
+  border: 1px solid var(--field-border);
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
+
+.pill.on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.gallery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.gallery-head h2 {
+  font-size: var(--font-size-md);
+}
+
+.place-gallery {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-1);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slides-track {
+    transition: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .place-main {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+.place-form {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 60rem;
+}
+
+.place-form label,
+.place-form legend {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.choice {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.choice legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.choice-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.choice-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.place-form .choice-pill {
+  font-weight: 400;
+}
+
+.choice-pill:has(input:checked) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.place-form .choice-pill:has(input:checked) {
+  font-weight: 600;
+}
+
+.choice-pill {
+  position: relative;
+}
+
+.choice-pill input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.choice-pill:has(input:focus-visible) {
+  outline: 3px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.visited-block {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.visited-block input[type="number"] {
+  width: 6rem;
+}
+
+.photo-empty {
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+  border: 1px dashed var(--field-border);
+  color: var(--muted);
+  font-size: var(--font-size-sm);
 }
