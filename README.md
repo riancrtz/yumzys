@@ -6,9 +6,11 @@ Demo video: (link, added in Week 3)
 
 Claude (Anthropic's AI assistant) wrote or shaped most of the code in this project. I ran, tested, deployed and debugged it, set up the database, hosting and photo storage accounts, and wrote the type filter on the Home screen myself. The full record is in [AI-USAGE.md](./AI-USAGE.md).
 
-[Screenshot: Home screen with the place cards and filters]
-
-[Screenshot: Place detail page with a photo]
+<img width="1910" height="915" alt="final-login" src="https://github.com/user-attachments/assets/15f1169b-f47b-4187-8d5f-92e78292fad6" />
+<img width="1910" height="1061" alt="final-home" src="https://github.com/user-attachments/assets/205e6542-93b2-4983-b844-cc435abbf660" />
+<img width="1910" height="967" alt="final-home2" src="https://github.com/user-attachments/assets/607c6ef0-2dbc-4b74-9b4e-297a433b35a1" />
+<img width="1910" height="1041" alt="final-addplace" src="https://github.com/user-attachments/assets/fb5f1eec-04ff-4a9b-8057-404e26e761bb" />
+<img width="349" height="1144" alt="final-mobileview" src="https://github.com/user-attachments/assets/be2052c3-3567-4532-baf1-28f47602dac0" />
 
 ## 1. Overview
 
