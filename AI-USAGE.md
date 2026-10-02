@@ -140,6 +140,13 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I kept, what I changed, and why:** The design decisions were mine. I asked for each change after using the app, approved the previews, and asked it to remove the extra Close button, the black radio dot, and the visible radio circles. I found that "No photo yet" sat in the top left corner of the place page. I tested the 5 photo limit, the place page, the delete dialog, and the new pills.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
 
+### 2026-10-02 - Rewriting the Basic Auth middleware myself
+- **Tool:** Claude
+- **What I asked for:** My professor's instructions say to write the Basic Auth middleware ourselves, and Claude had written the first version, so I asked how to redo it properly.
+- **What it gave back:** A list of the steps only, and a review of my code once I wrote it. It gave no code.
+- **What I kept, what I changed, and why:** I wrote the function myself and used the first colon to split the username and password, so passwords with colons work. I tested it with curl without credentials, which gave a 401 with the WWW-Authenticate header, and with a wrong and a right password on the login screen.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/8ecdbc8
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -213,6 +220,11 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **File:** `client/src/App.jsx` (the delete confirmation)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/94f2d03
 - **What it does and why it is built this way:** Before, one click on Delete removed a place for good. Now a small helper, `confirmDelete`, asks "Delete (place name)?" with the browser's `confirm` and returns true or false. Each Delete button checks it in its own click handler. I did not put the question inside `handleDelete` because the detail page's button calls `handleDelete` and then `setView(returnView)`. With the question inside, cancelling would still have sent me back to the list. Checking it in each button means cancelling does nothing at all, and I tested cancel and confirm from both the list and the detail page. Claude later replaced this with a styled confirmation dialog (commit https://github.com/riancrtz/yumzys/commit/b852e89), so this code is no longer in the app.
+
+### Written by me
+- **File:** `server/server.js` (the `basicAuth` middleware)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/8ecdbc8
+- **What it does and why it is built this way:** My professor asked us to write the Basic Auth gate ourselves. Claude had written the first version, so I rewrote it from his description, with Claude only listing the steps. It reads the `Authorization` header and rejects anything that does not start with `Basic `. It decodes the rest from base64 and splits it at the first colon only, so a password that contains a colon still works, which the earlier `split(':')` version would have broken. It compares the username and password with `ADMIN_USER` and `ADMIN_PASS` from the environment, calls `next()` on a match, and otherwise sends a 401 with a `WWW-Authenticate` header. It is registered before every `/api/places` route, so all of them are behind it.
 
 ### The AI-written part I understand best
 - **File:** `client/src/App.jsx` (`LoginScreen`)
