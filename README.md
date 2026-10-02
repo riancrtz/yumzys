@@ -85,12 +85,12 @@ To run the client alone with no backend, leave `VITE_USE_MOCK_API` unset and ski
 
 ## 4. Features and usage
 
-- **Log in.** Required before anything else. The app has one shared login and no guest mode.
-- **Home.** Lists all saved places, with two filter rows: by status (all, want to try, visited) and by type (all, restaurant, cafe).
-- **Visited.** Lists only places marked as visited.
-- **Add Place.** Add a restaurant or café with a name, type, area, status and notes. If the status is Visited, a rating field and a photo upload field appear.
-- **Place details.** Click Details on a card to see one place's photo, rating, area and notes, and to edit or delete it.
-- **Photos.** Only visited places can have a photo. Choose an image, it is shrunk in the browser (so a phone photo uploads small and its hidden location data is dropped), uploaded to Cloudinary, and the returned link is saved with the place.
+- **Log in.** Required before anything else. A wrong password shows a message, and a server that is down or waking up shows its own message.
+- **Home, Want to try, Visited.** The sidebar pages list all places, places to try, and visited places. Buttons above each list filter by type: all, restaurant, or cafe.
+- **Photo slideshow.** On the lists, a place with several photos cycles through them every few seconds. It pauses when you hover over or tab to the card, and stays still if your device asks for reduced motion.
+- **Add Place.** Add a restaurant or café with a name, type, area, status and notes. Type and status are pill choices. Choosing Visited shows a rating field and a photo upload for up to 5 photos.
+- **Place page.** Click a card to open its page: a large photo, type and area, rating, status and notes, plus a photo gallery where clicking a thumbnail shows it large. Edit opens the same form, and Delete asks for confirmation in a popup.
+- **Photos.** Only visited places can have photos, up to 5. Each one is shrunk in the browser, so a phone photo uploads small and its hidden location data is dropped, then uploaded to Cloudinary, and the returned link is saved with the place.
 
 **API endpoints:**
 

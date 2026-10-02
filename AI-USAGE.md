@@ -133,6 +133,13 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I kept, what I changed, and why:** I wrote the code myself: a small helper that asks the question and returns true or false, checked separately in the list button and the detail button. I tested cancel and confirm from both screens.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/94f2d03
 
+### 2026-10-01 to 2026-10-02 - Multi photo gallery and a redesigned place page
+- **Tool:** Claude
+- **What I asked for:** My proposal and wireframe promised several photos per place with a gallery. After using the app myself, I also wanted a cleaner layout: fewer filter buttons, a Want to try page in the sidebar, places that open on their own page laid out like my wireframe, a styled delete confirmation instead of the browser's popup, a photo slideshow on the cards, and status and type as pill choices in the form.
+- **What it gave back:** Rewrites of `App.jsx` and `styles.css`: up to 5 photos per place with multi file upload, a place page with a large photo, details, a photo gallery, Edit and Delete, a delete confirmation dialog, type filter buttons, a card slideshow that pauses on hover, and pill choices for status and type. It showed clickable previews of the place page and the filter colors before building them.
+- **What I kept, what I changed, and why:** The design decisions were mine. I asked for each change after using the app, approved the previews, and asked it to remove the extra Close button, the black radio dot, and the visible radio circles. I found that "No photo yet" sat in the top left corner of the place page. I tested the 5 photo limit, the place page, the delete dialog, and the new pills.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -183,21 +190,33 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I did instead:** I asked for a fix, and the check moved inside the login screen, so the app only appears after the server accepts the login.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
 
+### Case 9 - A placeholder stuck in the corner
+- **What it gave me:** A new style for the large photo on the place page.
+- **What was wrong with it:** The new rule came later in the stylesheet than the rule that centers "No photo yet", so it overrode the centering, and the text sat in the top left corner of the empty photo box.
+- **What I did instead:** I spotted it on the page. The fix moved the centering rule to the end of the stylesheet so it wins.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
+
+### Case 10 - Building a popup I did not ask for
+- **What it gave me:** When I said a place's options should "pop up" when I click it, it put the whole place view inside a popup dialog.
+- **What was wrong with it:** I meant the place should open with its options showing, like the place page in my wireframe, not a popup over the list.
+- **What I did instead:** I told it what I meant. It asked which behavior I wanted and showed a clickable preview of a separate page, and I approved that before it rewrote the code. Only the delete confirmation stayed a popup.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
+
 ## 3. Who wrote what
 
 ### Written by me
 - **File:** `client/src/App.jsx` (the type filter)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/4b45bd1
-- **What it does and why it is built this way:** The Home screen already had a status filter (All, Want to try, Visited). I added a second filter by type (Restaurant or Cafe) next to it. I added a `typeFilter` state, a second row of buttons that follows the same pattern as the first, and changed `visiblePlaces` so a place only shows if it matches both filters, using `&&`. I also simplified the status check to `filter === 'all' || p.status === filter`, so it needs one `filter` call and not a three way ternary. The two filters work together because each one is its own piece of state. During the design system pass, Claude replaced my button rows with a shared `FilterRow` component. The `typeFilter` state and the `visiblePlaces` condition are still the code I wrote.
+- **What it does and why it is built this way:** The Home screen already had a status filter (All, Want to try, Visited). I added a second filter by type (Restaurant or Cafe) next to it. I added a `typeFilter` state, a second row of buttons that follows the same pattern as the first, and changed `visiblePlaces` so a place only shows if it matches both filters, using `&&`. I also simplified the status check to `filter === 'all' || p.status === filter`, so it needs one `filter` call and not a three way ternary. The two filters work together because each one is its own piece of state. Claude later rewrote the filter controls several times, as a shared `FilterRow` component, then a dropdown, and finally the type buttons in `TypeFilter`. The status filter now comes from the sidebar page instead of buttons. The `typeFilter` state and the type half of the `visiblePlaces` condition are still the code I wrote.
 
 ### Written by me
 - **File:** `client/src/App.jsx` (the delete confirmation)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/94f2d03
-- **What it does and why it is built this way:** Before, one click on Delete removed a place for good. Now a small helper, `confirmDelete`, asks "Delete (place name)?" with the browser's `confirm` and returns true or false. Each Delete button checks it in its own click handler. I did not put the question inside `handleDelete` because the detail page's button calls `handleDelete` and then `setView(returnView)`. With the question inside, cancelling would still have sent me back to the list. Checking it in each button means cancelling does nothing at all, and I tested cancel and confirm from both the list and the detail page.
+- **What it does and why it is built this way:** Before, one click on Delete removed a place for good. Now a small helper, `confirmDelete`, asks "Delete (place name)?" with the browser's `confirm` and returns true or false. Each Delete button checks it in its own click handler. I did not put the question inside `handleDelete` because the detail page's button calls `handleDelete` and then `setView(returnView)`. With the question inside, cancelling would still have sent me back to the list. Checking it in each button means cancelling does nothing at all, and I tested cancel and confirm from both the list and the detail page. Claude later replaced this with a styled confirmation dialog (commit https://github.com/riancrtz/yumzys/commit/b852e89), so this code is no longer in the app.
 
 ### The AI-written part I understand best
 - **File:** `client/src/App.jsx` (`LoginScreen`)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
 - **What it does and why we kept it:** `LoginScreen` checks the credentials before leaving the login screen. On submit it saves them with `setCredentials`, then calls `listPlaces()`, and only calls `onLogin()` if that works. A 401 shows "Invalid username or password.", and any other error, like a server that is down or asleep, shows that error's own message. My first version let `App` show the whole app as soon as I submitted and return to the login screen after the 401. That made the page flash and wiped the username I typed. Checking inside `LoginScreen` fixed both, and I tested a wrong password, a right password, and the server stopped.
 
-My own code is a small share of the project. The type filter added 26 lines and the delete confirmation added 13, so 39 added lines in total, out of 1,061 lines of application source (JavaScript, JSX, CSS and SQL, not counting dependencies). That is about 4 percent, well under a fifth. The rest was written by Claude or came from the class template, and I tested, deployed and debugged it.
+My own code is a small share of the project. The type filter added 26 lines and the delete confirmation added 13, so 39 added lines in total, out of 1,061 lines of application source (JavaScript, JSX, CSS and SQL, not counting dependencies). That is about 4 percent, well under a fifth. The rest was written by Claude or came from the class template, and I tested, deployed and debugged it. I measured this on 2026-10-01. Some of those lines were replaced afterward and the app has grown, so my share of the final code is lower than 4 percent.
