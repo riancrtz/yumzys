@@ -1,9 +1,14 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import { rateLimit } from 'express-rate-limit'
 import { pool } from './db/pool.js'
 import * as places from './placesRepo.js'
 
 const app = express()
+
+app.set('trust proxy', 1)
+app.use(helmet())
 
 // CORS before the routes. Middleware registered after a route never sees that
 // route's requests, which is the m4 lesson showing up in production.
@@ -54,6 +59,16 @@ function basicAuth(request, response, next) {
   return response.status(401).send('Invalid credentials')
 }
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many failed attempts. Try again in 15 minutes.' },
+})
+
+app.use('/api', loginLimiter)
 app.use(basicAuth)
 
 function validate(body) {
@@ -68,6 +83,7 @@ function validate(body) {
 
   if (!name) errors.push('name is required')
   if (name.length > 120) errors.push('name must be 120 characters or fewer')
+  if (area.length > 120) errors.push('area must be 120 characters or fewer')
   if (!['restaurant', 'cafe'].includes(type)) errors.push('type must be restaurant or cafe')
   if (!['want_to_try', 'visited'].includes(status)) errors.push('status must be want_to_try or visited')
   if (notes.length > 2000) errors.push('notes must be 2000 characters or fewer')
