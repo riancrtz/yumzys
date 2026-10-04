@@ -1,5 +1,7 @@
 # Yumzys
 
+[![Made with AI](https://img.shields.io/badge/Made_with-AI_assistance-blue)](AI-USAGE.md)
+
 Live site: https://riancrtz.github.io/yumzys/
 API: https://yumzys-api.onrender.com
 Demo video: (link, added in Week 3)
