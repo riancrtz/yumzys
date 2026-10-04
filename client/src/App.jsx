@@ -502,6 +502,7 @@ export default function App() {
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [typeFilter, setTypeFilter] = useState('all')
+  const [searchText, setSearchText] = useState('')
   const [saving, setSaving] = useState(false)
 
   async function load() {
@@ -599,7 +600,10 @@ export default function App() {
   const statusFilter = STATUS_FOR_VIEW[view] ?? 'all'
 
   const visiblePlaces = places.filter(
-    (p) => (statusFilter === 'all' || p.status === statusFilter) && (typeFilter === 'all' || p.type === typeFilter)
+    (p) =>
+      (statusFilter === 'all' || p.status === statusFilter) &&
+      (typeFilter === 'all' || p.type === typeFilter) &&
+      (searchText === '' || p.name.toLowerCase().includes(searchText.toLowerCase()))
   )
 
   return (
@@ -662,6 +666,14 @@ export default function App() {
 
           {isList && (
             <>
+              <label htmlFor="place-search">Search places</label>
+              <input
+                id="place-search"
+                type="search"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+
               <TypeFilter value={typeFilter} onChange={setTypeFilter} />
 
               {status === 'loading' && (
@@ -671,7 +683,9 @@ export default function App() {
               )}
 
               {status === 'ready' && visiblePlaces.length === 0 && (
-                <p className="muted">No places here yet.</p>
+                <p className="muted">
+                  {searchText ? 'No places match your search.' : 'No places here yet.'}
+                </p>
               )}
 
               {status === 'ready' && visiblePlaces.length > 0 && (
