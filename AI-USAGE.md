@@ -168,6 +168,27 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I kept, what I changed, and why:** I recorded the video and spoke in my own words. I chose the PowerPoint over the Canva version, and I asked it to rework the content when I noticed the brief wanted a challenges slide.
 - **Commit:** Not in this repository. The slides and the image are in my private workspace `project/` folder and submitted on Canvas.
 
+### 2026-10-04 - A search box for the place lists
+- **Tool:** Claude
+- **What I asked for:** With more places saved, the lists were getting long, so I asked how to add a search box that filters by name.
+- **What it gave back:** The approach only: where the state goes, that the filter needs the same off-switch shape as my type filter, and that both sides should be lower cased. It asked me to work out what the "off" check should be. It gave no code.
+- **What I kept, what I changed, and why:** I wrote it myself, including the condition and the input. It then suggested two additions I made: `type="search"` for the clear button, and a different empty message when a search matches nothing. This landed in the same commit as the database role work.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/98b4e2a
+
+### 2026-10-04 - Connecting the app as a scoped database role
+- **Tool:** Claude
+- **What I asked for:** My security checklist said the app connects as Neon's default owner role, which can drop tables, when it only needs to read and write rows. I asked what the narrower role needed.
+- **What it gave back:** The four things to grant, and a warning that a SERIAL id column uses a hidden sequence that needs its own grant or inserts fail. It gave no SQL.
+- **What I kept, what I changed, and why:** I wrote the four statements myself and ran them in the Neon SQL editor, then checked `information_schema.role_table_grants`, which returned exactly SELECT, INSERT, UPDATE and DELETE. I saved them in `server/db/role.sql` with a placeholder password, switched `DATABASE_URL` locally and on Render, and tested the live site.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/98b4e2a
+
+### 2026-10-04 - Status toggle and photo upload on the place page
+- **Tool:** Claude
+- **What I asked for:** My wireframe put the status toggle and Add Photo on the place page itself, but the app only had them inside Edit. I asked what the change would involve.
+- **What it gave back:** Where each piece lives in the file, and four things to work out myself: what to send when saving, what the rating should become when a place becomes visited, that the pills were hidden from screen readers and would need that removed, and that two fast clicks could send two requests. It gave no code.
+- **What I kept, what I changed, and why:** I wrote all of it. It reviewed my version and pointed out that a failure partway through a multi photo upload would still save the earlier photos while showing an error, which could read as nothing having saved. I changed the message to say how many photos had uploaded and that they would still be saved.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/2f4f6b5
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -259,9 +280,24 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **Commit:** https://github.com/riancrtz/yumzys/commit/8ecdbc8
 - **What it does and why it is built this way:** My professor asked us to write the Basic Auth gate ourselves. Claude had written the first version, so I rewrote it from his description, with Claude only listing the steps. It reads the `Authorization` header and rejects anything that does not start with `Basic `. It decodes the rest from base64 and splits it at the first colon only, so a password that contains a colon still works, which the earlier `split(':')` version would have broken. It compares the username and password with `ADMIN_USER` and `ADMIN_PASS` from the environment, calls `next()` on a match, and otherwise sends a 401 with a `WWW-Authenticate` header. It is registered before every `/api/places` route, so all of them are behind it.
 
+### Written by me
+- **File:** `client/src/App.jsx` (the search box)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/98b4e2a
+- **What it does and why it is built this way:** The search box filters the list as you type. `searchText` is React state, so the list updates on every keystroke. Both the place name and the search text are lower cased, so "Cafe" and "cafe" match. An empty box (`searchText === ''`) shows every place. The empty message checks `searchText` so it says "No places match your search." after a search and "No places here yet." when there are no places at all.
+
+### Written by me
+- **File:** `server/db/role.sql`
+- **Commit:** https://github.com/riancrtz/yumzys/commit/98b4e2a
+- **What it does and why it is built this way:** It creates a `places_app` role that can only read, add, edit and delete rows in `places`. It cannot drop tables or create roles, so a leaked connection string does less damage. The schema grant is needed because Postgres will not let a role into a schema without it. The `SERIAL` id uses a hidden sequence, so the role needs a grant on `places_id_seq` or inserts fail. `npm run db:reset` still needs the owner connection string because it creates the tables, and `places_app` is not allowed to do that.
+
+### Written by me
+- **File:** `client/src/App.jsx` (`PlaceDetails`, the status toggle and photo upload)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/2f4f6b5
+- **What it does and why it is built this way:** The status pills switch a place between Want to try and Visited in one click, and "+ Add Photo" opens a file picker and uploads. `toValues` builds the full place object that `updatePlace` expects, and each caller changes only what it needs to. Switching to Visited sets the rating to 4 so the place does not show zero stars. Switching to Want to try clears the rating and photos, so it asks for confirmation first when photos exist. The `busy` flag is true while saving or uploading and disables the buttons, so double clicks cannot send two requests.
+
 ### The AI-written part I understand best
 - **File:** `client/src/App.jsx` (`LoginScreen`)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
 - **What it does and why we kept it:** `LoginScreen` checks the credentials before leaving the login screen. On submit it saves them with `setCredentials`, then calls `listPlaces()`, and only calls `onLogin()` if that works. A 401 shows "Invalid username or password.", and any other error, like a server that is down or asleep, shows that error's own message. My first version let `App` show the whole app as soon as I submitted and return to the login screen after the 401. That made the page flash and wiped the username I typed. Checking inside `LoginScreen` fixed both, and I tested a wrong password, a right password, and the server stopped.
 
-My own code is a small share of the project. The type filter added 26 lines and the delete confirmation added 13, so 39 added lines in total, out of 1,061 lines of application source (JavaScript, JSX, CSS and SQL, not counting dependencies). That is about 4 percent, well under a fifth. The rest was written by Claude or came from the class template, and I tested, deployed and debugged it. I measured this on 2026-10-01. Some of those lines were replaced afterward and the app has grown, so my share of the final code is lower than 4 percent. After that, I rewrote the Basic Auth middleware myself (about 20 lines), so my own code in the final app is still well under a fifth.
+My own code is a small share of this project. I wrote the type filter, the delete confirmation, the Basic Auth middleware, the search box, the database role in `server/db/role.sql`, and the status toggle and photo upload on the place page. The rest was written by Claude or came from the class template, and I tested, deployed and debugged all of it. I used AI heavily to get a working, deployed app in three weeks, and the parts I wrote are ones I can explain.
