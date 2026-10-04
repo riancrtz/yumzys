@@ -147,6 +147,27 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I kept, what I changed, and why:** I wrote the function myself and used the first colon to split the username and password, so passwords with colons work. I tested it with curl without credentials, which gave a 401 with the WWW-Authenticate header, and with a wrong and a right password on the login screen.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/8ecdbc8
 
+### 2026-10-02 - Proposal, weekly reports and README updates
+- **Tool:** Claude
+- **What I asked for:** My professor's instructions say the proposal copy in the repository should describe the app as built, with cut features moved to stretch goals, and that weekly reports should be written in sections. I also needed the README features and next steps brought up to date.
+- **What it gave back:** A rewritten proposal, three weekly report sections drawn from my increment reports, and new README text for the features and next steps.
+- **What I kept, what I changed, and why:** I checked each claim against the live app and chose my own hours: about 11, 8 and 12. Claude counted chat time as a floor, but I decided the numbers. I noted at the top of the reports that the first two weeks were written afterward. I also added my own screenshots to the README in commit https://github.com/riancrtz/yumzys/commit/c758174.
+- **Commit:** README https://github.com/riancrtz/yumzys/commit/5558286, proposal https://github.com/riancrtz/yumzys/commit/7390a64, weekly reports https://github.com/riancrtz/yumzys/commit/9ec7ea8
+
+### 2026-10-03 - Security review: helmet, rate limiting and dependency fixes
+- **Tool:** Claude
+- **What I asked for:** My professor's security checklist asks for helmet, rate limiting on anything that accepts a password, length limits on every text field, and an npm audit. I asked what my project was missing.
+- **What it gave back:** A list of the gaps, the install command, helmet, a rate limiter that allows 20 failed requests per 15 minutes, placed above my login gate, and a server side length check on the area field, as a full `server.js`.
+- **What I kept, what I changed, and why:** I installed the packages and ran `npm audit`, which found a moderate issue in a dependency of Express. `npm audit fix` solved it without `--force`. I tested with curl: the `X-Powered-By` header was gone, helmet's headers and the rate limit headers appeared, and I got nineteen 401 responses and then 429. It had predicted twenty, but my first request used one. My own `basicAuth` stayed unchanged in the file. I then tested a wrong and a right password on the live site.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/d79967d
+
+### 2026-10-03 - Planning the demo video, the slides and the square image
+- **Tool:** Claude, and Canva
+- **What I asked for:** A flow for my 3 to 5 minute demo video that matches my professor's brief, then slides covering the problem, a demo, the tech, the challenges and what is next, and a 1080 by 1080 square image.
+- **What it gave back:** A timed outline with talking points, an 8 slide PowerPoint with speaker notes, and a Canva square image with a plate and cutlery logo. It also built a Canva version of the slides, which I did not use.
+- **What I kept, what I changed, and why:** I recorded the video and spoke in my own words. I chose the PowerPoint over the Canva version, and I asked it to rework the content when I noticed the brief wanted a challenges slide.
+- **Commit:** Not in this repository. The slides and the image are in my private workspace `project/` folder and submitted on Canvas.
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -207,6 +228,18 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What it gave me:** When I said a place's options should "pop up" when I click it, it put the whole place view inside a popup dialog.
 - **What was wrong with it:** I meant the place should open with its options showing, like the place page in my wireframe, not a popup over the list.
 - **What I did instead:** I told it what I meant. It asked which behavior I wanted and showed a clickable preview of a separate page, and I approved that before it rewrote the code. Only the delete confirmation stayed a popup.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
+
+### Case 11 - A checklist row that was not true
+- **What it gave me:** Row 27 of my security checklist, drafted as Yes, saying all my commits use a GitHub no-reply email.
+- **What was wrong with it:** It never checked. My git log showed one commit, the initial commit that GitHub created from the class template, with my personal email as the author.
+- **What I did instead:** I changed row 27 to No, explained the finding in the checklist, and turned on GitHub's email privacy settings. I did not rewrite history, because that would break every commit link in this file.
+- **Commit:** Not in this repository. The checklist is in my private workspace.
+
+### Case 12 - Edit instructions I applied to the wrong place
+- **What it gave me:** Instructions to add a small pill component and to replace the form inside `PlaceForm`, as two separate pieces.
+- **What was wrong with it:** The instructions were easy to misapply. I pasted the new form into the pill component and left the old `PlaceForm` untouched, so the page did not change, and the new component would have crashed.
+- **What I did instead:** It checked my file, saw the mix up, and gave me one full replacement for both functions. I checked the page afterward.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/b852e89
 
 ## 3. Who wrote what
