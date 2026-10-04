@@ -189,6 +189,13 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **What I kept, what I changed, and why:** I wrote all of it. It reviewed my version and pointed out that a failure partway through a multi photo upload would still save the earlier photos while showing an error, which could read as nothing having saved. I changed the message to say how many photos had uploaded and that they would still be saved.
 - **Commit:** https://github.com/riancrtz/yumzys/commit/2f4f6b5
 
+### 2026-10-04 - Asking which design work was worth doing
+- **Tool:** Claude
+- **What I asked for:** I asked which design work would give the app the most real benefit, rather than the most lines.
+- **What it gave back:** A ranked list of five areas: the phone layout, the toolbar row, the empty states, hover and focus states, and loading feedback. Later it explained why both status pills were filling with colour, which was my general `button` rule overriding `.pill`. It gave no other code.
+- **What I kept, what I changed, and why:** I wrote all of the design work myself. I also added a dedicated dialog for the status change, which it had not suggested, so the app uses one style of dialog everywhere instead of the browser's.
+- **Commit:** https://github.com/riancrtz/yumzys/commit/cca824d
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Baking admin credentials into the client build
@@ -295,9 +302,14 @@ Entry dates are the dates of the work. This file was started on 2026-09-26, and 
 - **Commit:** https://github.com/riancrtz/yumzys/commit/2f4f6b5
 - **What it does and why it is built this way:** The status pills switch a place between Want to try and Visited in one click, and "+ Add Photo" opens a file picker and uploads. `toValues` builds the full place object that `updatePlace` expects, and each caller changes only what it needs to. Switching to Visited sets the rating to 4 so the place does not show zero stars. Switching to Want to try clears the rating and photos, so it asks for confirmation first when photos exist. The `busy` flag is true while saving or uploading and disables the buttons, so double clicks cannot send two requests.
 
+### Written by me
+- **Files:** `client/src/App.jsx` and `client/src/styles.css` (the design pass and the status dialog)
+- **Commit:** https://github.com/riancrtz/yumzys/commit/cca824d
+- **What it does and why it is built this way:** This pass polishes how the app looks and feels. The layout now works on a phone: the controls are at least 44px tall, the nav wraps cleanly, and long place names no longer push the page sideways. Hover and focus states are consistent, so a selected tab, chip or pill stays solid when hovered. The search box sits on the same row as the type chips. Empty states (no places, no search results, no photos) show a short message with a button instead of plain text. A spinner and "Saving..." line show while a status change or photo upload is in progress. Switching a visited place with photos to Want to try now opens an in-app dialog instead of the browser popup, because that switch clears the rating and photos and cannot be undone. Cancel is focused by default so an accidental Enter keeps the photos, and the dialog reuses the existing `Modal`, so it matches the delete dialog.
+
 ### The AI-written part I understand best
 - **File:** `client/src/App.jsx` (`LoginScreen`)
 - **Commit:** https://github.com/riancrtz/yumzys/commit/e7a3a3a
 - **What it does and why we kept it:** `LoginScreen` checks the credentials before leaving the login screen. On submit it saves them with `setCredentials`, then calls `listPlaces()`, and only calls `onLogin()` if that works. A 401 shows "Invalid username or password.", and any other error, like a server that is down or asleep, shows that error's own message. My first version let `App` show the whole app as soon as I submitted and return to the login screen after the 401. That made the page flash and wiped the username I typed. Checking inside `LoginScreen` fixed both, and I tested a wrong password, a right password, and the server stopped.
 
-My own code is a small share of this project. I wrote the type filter, the delete confirmation, the Basic Auth middleware, the search box, the database role in `server/db/role.sql`, and the status toggle and photo upload on the place page. The rest was written by Claude or came from the class template, and I tested, deployed and debugged all of it. I used AI heavily to get a working, deployed app in three weeks, and the parts I wrote are ones I can explain.
+I have measured my own share of this project rather than estimated it. On 2026-10-04 the application source was 1,904 lines of JavaScript, JSX, CSS and SQL, not counting dependencies. The parts I wrote come to about 430 lines, roughly 22 percent: the type filter (26), the delete confirmation (13), the Basic Auth middleware (about 20), the search box and the database role file (about 20), the status toggle and photo upload on the place page (107), and the design pass and status dialog (264). Some of the earlier lines were later replaced by Claude, so the share still in the final app is a little lower than that. The rest was written by Claude or came from the class template, and I tested, deployed and debugged all of it.
