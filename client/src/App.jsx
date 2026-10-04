@@ -213,23 +213,89 @@ function TypeFilter({ value, onChange }) {
   )
 }
 
-function PlaceDetails({ place, onEdit, onDelete }) {
+function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
   const photos = place.photos ?? []
   const [current, setCurrent] = useState(0)
+  const [uploading, setUploading] = useState(false)
+  const [photoError, setPhotoError] = useState(null)
+  const fileInput = useRef(null)
   const index = Math.min(current, Math.max(photos.length - 1, 0))
   const visited = place.status === 'visited'
   const canAddPhoto = visited && photos.length < MAX_PHOTOS
+  const busy = saving || uploading
+
+  function toValues(overrides) {
+    return {
+      name: place.name,
+      type: place.type,
+      area: place.area ?? '',
+      status: place.status,
+      rating: place.rating ?? 4,
+      notes: place.notes ?? '',
+      photos,
+      ...overrides,
+    }
+  }
+
+  function changeStatus(next) {
+    if (busy || next === place.status) return
+    if (
+      next === 'want_to_try' &&
+      photos.length > 0 &&
+      !window.confirm('Switching to Want to try removes this place\'s photos. Continue?')
+    ) {
+      return
+    }
+    onSave(
+      toValues({
+        status: next,
+        rating: next === 'visited' ? (place.rating ?? 4) : null,
+        photos: next === 'visited' ? photos : [],
+      })
+    )
+  }
+
+  async function handleFiles(event) {
+    const chosen = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (chosen.length === 0) return
+
+    const room = MAX_PHOTOS - photos.length
+    const files = chosen.slice(0, room)
+    setPhotoError(
+      chosen.length > room ? `Only ${MAX_PHOTOS} photos per place, so extra files were skipped.` : null
+    )
+
+    setUploading(true)
+    const urls = []
+    try {
+      for (const file of files) {
+        urls.push(await uploadPhoto(file))
+      }
+    } catch (caught) {
+      setPhotoError(
+        urls.length > 0
+          ? `${caught.message} The ${urls.length} photo${urls.length === 1 ? '' : 's'} uploaded before that will still be saved.`
+          : caught.message
+      )
+    }
+    try {
+      if (urls.length > 0) await onSave(toValues({ photos: [...photos, ...urls] }))
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <section className="place-page">
       <div className="place-head">
         <h1>{place.name}</h1>
         <div className="form-actions">
-          <button type="button" onClick={onEdit}>Edit</button>
-          <button type="button" className="ghost" onClick={onDelete}>Delete</button>
+          <button type="button" disabled={busy} onClick={onEdit}>Edit</button>
+          <button type="button" className="ghost" disabled={busy} onClick={onDelete}>Delete</button>
         </div>
       </div>
-
+      
       <div className="place-main">
         <PlacePhoto url={photos[index]} alt={`Photo of ${place.name}`} className="hero" />
         <dl className="facts">
@@ -244,11 +310,20 @@ function PlaceDetails({ place, onEdit, onDelete }) {
           <div>
             <dt>Status</dt>
             <dd>
-              <span className="sr-only">{visited ? 'Visited' : 'Want to try'}</span>
-              <span className="pills" aria-hidden="true">
-                <span className={visited ? 'pill' : 'pill on'}>Want to try</span>
-                <span className={visited ? 'pill on' : 'pill'}>Visited</span>
-              </span>
+              <div className="pills" role="group" aria-label="Status">
+                {STATUS_CHOICES.map(([key, text]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={place.status === key ? 'pill on' : 'pill'}
+                    aria-pressed={place.status === key}
+                    disabled={busy}
+                    onClick={() => changeStatus(key)}
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
             </dd>
           </div>
           <div>
@@ -260,10 +335,29 @@ function PlaceDetails({ place, onEdit, onDelete }) {
 
       <div className="gallery-head">
         <h2>Photo Gallery</h2>
-        {canAddPhoto && (
-          <button type="button" className="ghost" onClick={onEdit}>+ Add Photo</button>
+        {canAddPhoto && UPLOADS_ENABLED && (
+          <>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleFiles}
+            />
+            <button
+              type="button"
+              className="ghost"
+              disabled={busy}
+              onClick={() => fileInput.current.click()}
+            >
+              {uploading ? 'Uploading...' : '+ Add Photo'}
+            </button>
+          </>
         )}
       </div>
+      {photoError && <p className="error" role="alert">{photoError}</p>}
+      
       {photos.length > 0 ? (
         <ul className="place-gallery">
           {photos.map((url, i) => (
@@ -657,6 +751,8 @@ export default function App() {
                 <PlaceDetails
                   key={selected.id}
                   place={selected}
+                  saving={saving}
+                  onSave={handleUpdate}
                   onEdit={() => setEditing(true)}
                   onDelete={() => setConfirming(true)}
                 />
