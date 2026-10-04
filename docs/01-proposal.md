@@ -15,11 +15,12 @@ Me, specifically. When I open it, I'm either adding a new place I heard about fr
 | # | Screen | What it does |
 |---|---|---|
 | 1 | Login | One shared login in front of the whole app. A wrong password shows a message. |
-| 2 | Home | All saved places as cards, with type filter buttons (all, restaurant, cafe). Places with several photos show a slideshow. |
-| 3 | Want to try | Only places I have not visited yet, with the same cards and type filter. Added after testing. |
-| 4 | Visited | Only places I have visited, with the same cards and type filter. |
+| 2 | Home | All saved places as cards, with type filter buttons (all, restaurant, cafe) and a search box that filters by name. Places with several photos show a slideshow. |
+| 3 | Want to try | Only places I have not visited yet, with the same cards, type filter and search. Added after testing. |
+| 4 | Visited | Only places I have visited, with the same cards, type filter and search. |
 | 5 | Add Place | A form with name, type, area, status and notes. Choosing Visited shows a rating and up to 5 photo uploads. |
-| 6 | Place page | Opens when I click a card: a large photo, type and area, rating, status, notes, a photo gallery, Edit, and Delete with a confirmation popup. |
+| 6 | Place page | Opens when I click a card: a large photo, type and area, rating, status, notes, a photo gallery, Edit, and Delete with a confirmation popup. The status pills switch between Want to try and Visited in place, and Add Photo uploads from the page without opening Edit. |
+
 
 The screens are views switched by state in `App.jsx`, not separate URL routes.
 
@@ -32,6 +33,7 @@ The screens are views switched by state in `App.jsx`, not separate URL routes.
 | selectedId | id or null | App | I open a place's page |
 | typeFilter | `"all"` \| `"restaurant"` \| `"cafe"` | App | I click a type button |
 | form values | the fields of one place | PlaceForm | I type in the add or edit form |
+| searchText | string | App | I type in the search box |
 
 The original `filterStatus` was replaced by the sidebar pages, so the status filter is now the page you are on.
 
@@ -48,6 +50,7 @@ Changes:
 - 2026-09-30: added Unsplash for automatic photos. Removed on 2026-10-01 because the photos did not match the actual places.
 - 2026-10-01: added Cloudinary for my own photo uploads.
 - 2026-10-01: renamed the repository to yumzys, which moved the live site to https://riancrtz.github.io/yumzys/.
+- 2026-10-04: the app now connects to Neon as a scoped role, `places_app`, instead of the database owner.
 
 ## Demo mode
 
@@ -56,16 +59,13 @@ Off. The deployed client has used the real API since 2026-09-23, when `VITE_USE_
 ## Stretch goals and cut features
 
 Cut or changed, and why:
-- **Status toggle and adding photos on the place page.** Cut for a simpler page. Status and photos are changed through Edit.
 - **Status filter buttons on Home.** Replaced by the Want to try and Visited pages in the sidebar, because having both was redundant.
 - **Automatic photos from Unsplash.** Built and removed, because the photos were random and not of the real place.
 - **Photo by pasted link.** Built and replaced by real upload, because a personal log should hold my own photos.
 - **Placeholder icons by type.** Not used. A place without a photo shows "No photo yet".
 
 Stretch goals:
-- Create a scoped-down database role instead of using the default owner.
 - Delete the Cloudinary file when a photo is removed.
-- Change the status and add photos directly on the place page, without opening Edit.
 - Photos of the real place through the Google Places API, which needs a billing account and a spending quota.
 
 ## Content gathered
@@ -80,3 +80,4 @@ Stretch goals:
 - **Render's cold start: still there.** The first request after a break can take about a minute, so the app shows a "server may be waking up" message.
 - **Secrets in a public repository: handled.** `.env` files are git-ignored, I searched the full history for passwords, and secret scanning is on.
 - **New: photo storage.** The unsigned upload preset could be used by anyone who finds its name. It only accepts image formats, and the free plan has no card attached.
+- **Phone layout: checked and fixed.** The app was built on a wide screen, so on 2026-10-04 I went through every screen at 375 pixels wide and gave every control a 44 pixel minimum tap target.
