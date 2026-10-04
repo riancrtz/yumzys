@@ -111,6 +111,20 @@ function Rating({ place }) {
   return <span className="badge">Want to try</span>
 }
 
+function EmptyState({ title, hint, action }) {
+  return (
+    <div className="empty">
+      <p className="empty-title">{title}</p>
+      {hint && <p className="muted">{hint}</p>}
+      {action}
+    </div>
+  )
+}
+
+function Spinner() {
+  return <span className="spinner" aria-hidden="true" />
+}
+
 function PlacePhoto({ url, alt, className = 'photo' }) {
   const [failed, setFailed] = useState(false)
 
@@ -119,7 +133,26 @@ function PlacePhoto({ url, alt, className = 'photo' }) {
   }, [url])
 
   if (!url || failed) {
-    return <div className={`${className} photo-empty`}>No photo yet</div>
+    return (
+      <div className={`${className} photo-empty`}>
+        <svg
+          className="empty-icon"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M4 8h3l2-2h6l2 2h3v11H4z" />
+          <circle cx="12" cy="13" r="3.5" />
+        </svg>
+        <span>No photo yet</span>
+      </div>
+    )
   }
 
   return (
@@ -218,6 +251,7 @@ function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
   const [current, setCurrent] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [photoError, setPhotoError] = useState(null)
+  const [confirmingStatus, setConfirmingStatus] = useState(false)
   const fileInput = useRef(null)
   const index = Math.min(current, Math.max(photos.length - 1, 0))
   const visited = place.status === 'visited'
@@ -237,15 +271,7 @@ function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
     }
   }
 
-  function changeStatus(next) {
-    if (busy || next === place.status) return
-    if (
-      next === 'want_to_try' &&
-      photos.length > 0 &&
-      !window.confirm('Switching to Want to try removes this place\'s photos. Continue?')
-    ) {
-      return
-    }
+  function saveStatus(next) {
     onSave(
       toValues({
         status: next,
@@ -253,6 +279,20 @@ function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
         photos: next === 'visited' ? photos : [],
       })
     )
+  }
+
+  function changeStatus(next) {
+    if (busy || next === place.status) return
+    if (next === 'want_to_try' && photos.length > 0) {
+      setConfirmingStatus(true)
+      return
+    }
+    saveStatus(next)
+  }
+
+  function confirmWantToTry() {
+    setConfirmingStatus(false)
+    saveStatus('want_to_try')
   }
 
   async function handleFiles(event) {
@@ -324,6 +364,14 @@ function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
                   </button>
                 ))}
               </div>
+              <p className="progress" role="status">
+                {busy && (
+                  <>
+                    <Spinner />
+                    {uploading ? 'Uploading photos...' : 'Saving...'}
+                  </>
+                )}
+              </p>
             </dd>
           </div>
           <div>
@@ -375,10 +423,37 @@ function PlaceDetails({ place, saving, onSave, onEdit, onDelete }) {
           ))}
         </ul>
       ) : (
-        <p className="muted">
-          {visited ? 'No photos yet. Use Add Photo to upload some.' : 'You can add photos after you visit.'}
-        </p>
+        <EmptyState
+          title={visited ? 'No photos yet' : 'Photos come after your visit'}
+          hint={
+            visited
+              ? UPLOADS_ENABLED ? 'Use Add Photo to upload some.' : null
+              : 'Mark this place as Visited to add photos.'
+          }
+        />
       )}
+      <Modal
+        open={confirmingStatus}
+        title="Remove photos?"
+        small
+        onClose={() => setConfirmingStatus(false)}
+      >
+        <p>
+          Switching {place.name} to Want to try clears its rating and removes{' '}
+          {photos.length === 1 ? 'its photo' : `all ${photos.length} photos`}. This can't be undone.
+        </p>
+        <div className="form-actions">
+          <button type="button" onClick={confirmWantToTry}>Switch and remove</button>
+          <button
+            type="button"
+            className="ghost"
+            data-autofocus
+            onClick={() => setConfirmingStatus(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
     </section>
   )
 }
@@ -762,15 +837,20 @@ export default function App() {
 
           {isList && (
             <>
-              <label htmlFor="place-search">Search places</label>
-              <input
-                id="place-search"
-                type="search"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
+              <div className="toolbar">
+                <TypeFilter value={typeFilter} onChange={setTypeFilter} />
 
-              <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+                <div className="search">
+                  <label htmlFor="place-search" className="sr-only">Search places</label>
+                  <input
+                    id="place-search"
+                    type="search"
+                    placeholder="Search places"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </div>
+              </div>
 
               {status === 'loading' && (
                 <p className="muted">
@@ -779,9 +859,23 @@ export default function App() {
               )}
 
               {status === 'ready' && visiblePlaces.length === 0 && (
-                <p className="muted">
-                  {searchText ? 'No places match your search.' : 'No places here yet.'}
-                </p>
+                searchText ? (
+                  <EmptyState
+                    title="No places match your search"
+                    hint="Try a different name, or clear the search."
+                    action={
+                      <button type="button" className="ghost" onClick={() => setSearchText('')}>
+                        Clear search
+                      </button>
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    title="No places here yet"
+                    hint="Add a restaurant or café you want to try."
+                    action={<button type="button" onClick={() => setView('add')}>Add a place</button>}
+                  />
+                )
               )}
 
               {status === 'ready' && visiblePlaces.length > 0 && (
