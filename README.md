@@ -135,10 +135,10 @@ All `/api/places` routes require login (HTTP Basic Auth). The server validates e
 <img width="1910" height="915" alt="03-want-to-try" src="https://github.com/user-attachments/assets/94c80f40-567a-4798-b5de-cab35f54f479" />
 <img width="1910" height="1060" alt="04-visited" src="https://github.com/user-attachments/assets/067aba7d-8b20-44bf-a46a-f9c7f2d2eaa8" />
 <img width="1910" height="1041" alt="05-add-place" src="https://github.com/user-attachments/assets/3afd2132-215e-4cb3-b8c2-9f5bb81ebc54" />
-<img width="1910" height="927" alt="07-place-page" src="https://github.com/user-attachments/assets/9363646b-8f2f-4c8c-93c7-1e3f4c9a554c" />
-<img width="1910" height="967" alt="06-place-page" src="https://github.com/user-attachments/assets/09bcf8f9-5f6f-44ba-819f-653d957ce1eb" />
-<img width="1910" height="915" alt="08-search" src="https://github.com/user-attachments/assets/d11ec27f-5a26-41aa-8314-db5a61455ab0" />
-<img width="147" height="1072" alt="09-phone-view" src="https://github.com/user-attachments/assets/dfc9b9c7-cd6c-41ed-bf4b-65330a224f1c" />
+<img width="1910" height="967" alt="06-place-page" src="https://github.com/user-attachments/assets/00683ad1-2c27-4a6a-abe6-87b4bc54f2c4" />
+<img width="1910" height="927" alt="07-place-page" src="https://github.com/user-attachments/assets/30c3a426-20cb-4104-9994-84658050b95d" />
+<img width="1910" height="915" alt="08-search" src="https://github.com/user-attachments/assets/4c16b53d-9d69-489f-a3fe-ce38db7ace2d" />
+<img width="147" height="1072" alt="09-phone-view" src="https://github.com/user-attachments/assets/60f3c411-e572-4655-bb55-10cfb0ae221f" />
 
 ## 7. Known issues and next steps
 
