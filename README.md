@@ -130,11 +130,15 @@ All `/api/places` routes require login (HTTP Basic Auth). The server validates e
 
 ## 6. Screenshots
 
-<img width="1910" height="915" alt="final-login" src="https://github.com/user-attachments/assets/15f1169b-f47b-4187-8d5f-92e78292fad6" />
-<img width="1910" height="1061" alt="final-home" src="https://github.com/user-attachments/assets/205e6542-93b2-4983-b844-cc435abbf660" />
-<img width="1910" height="967" alt="final-home2" src="https://github.com/user-attachments/assets/607c6ef0-2dbc-4b74-9b4e-297a433b35a1" />
-<img width="1910" height="1041" alt="final-addplace" src="https://github.com/user-attachments/assets/fb5f1eec-04ff-4a9b-8057-404e26e761bb" />
-<img width="349" height="1144" alt="final-mobileview" src="https://github.com/user-attachments/assets/be2052c3-3567-4532-baf1-28f47602dac0" />
+<img width="1910" height="915" alt="01-login" src="https://github.com/user-attachments/assets/10feb9a7-af65-4716-a28d-d889fd0a6afe" />
+<img width="1910" height="1507" alt="02-home" src="https://github.com/user-attachments/assets/61c8c97b-5382-4b15-a86e-913a657c9fac" />
+<img width="1910" height="915" alt="03-want-to-try" src="https://github.com/user-attachments/assets/94c80f40-567a-4798-b5de-cab35f54f479" />
+<img width="1910" height="1060" alt="04-visited" src="https://github.com/user-attachments/assets/067aba7d-8b20-44bf-a46a-f9c7f2d2eaa8" />
+<img width="1910" height="1041" alt="05-add-place" src="https://github.com/user-attachments/assets/3afd2132-215e-4cb3-b8c2-9f5bb81ebc54" />
+<img width="1910" height="967" alt="06-place-page" src="https://github.com/user-attachments/assets/09bcf8f9-5f6f-44ba-819f-653d957ce1eb" />
+<img width="1910" height="927" alt="07-place-page" src="https://github.com/user-attachments/assets/9363646b-8f2f-4c8c-93c7-1e3f4c9a554c" />
+<img width="1910" height="915" alt="08-search" src="https://github.com/user-attachments/assets/d11ec27f-5a26-41aa-8314-db5a61455ab0" />
+<img width="147" height="1072" alt="09-phone-view" src="https://github.com/user-attachments/assets/dfc9b9c7-cd6c-41ed-bf4b-65330a224f1c" />
 
 ## 7. Known issues and next steps
 
