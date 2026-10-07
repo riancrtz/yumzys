@@ -2,7 +2,7 @@
 
 The rules this interface follows, so that screen four looks like screen one.
 
-**Visual document:** `../assets/design-system.pdf`
+**Visual document:** /assets/design-system.pdf
 
 ## Colour
 
