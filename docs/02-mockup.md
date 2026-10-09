@@ -74,6 +74,8 @@ Two differences between this mockup and the built app, both deliberate:
 - The photo areas here are flat colour blocks standing in for real images. In
   the app these are my own photos, uploaded through Cloudinary.
 - The slideshow is drawn as a static row of dots. In the app the dots look the
-  same, but the photos cycle when you click them.
+  same, but the photos advance on their own every three seconds, pausing while
+  the card is hovered or focused, and staying still if the device asks for
+  reduced motion.
 
 Everything else in the mockup is in the built app.
