@@ -145,15 +145,13 @@ All `/api/places` routes require login (HTTP Basic Auth). The server validates e
 - Uploaded photos have public links. Anyone who has a link can open that picture.
 - The Cloudinary upload preset is unsigned, so anyone who finds its name in the built site could upload an image of an allowed type to my account. The preset only accepts jpg, jpeg, png and webp, and the account is on the free plan with no card attached.
 - Removing a photo from a place, or deleting a place, only removes the link. The file stays in Cloudinary.
-- The app connects to the database as Neon's default owner role, which has more permissions than the app needs.
 - The login is one shared account kept in memory, so refreshing the page asks for the login again.
 - The API runs on a free Render instance that sleeps when idle, so the first request after a break can take up to a minute.
 
 **What I would do next:**
-- Create a scoped-down database role instead of using the default owner.
 - Delete the Cloudinary file when a photo is removed, through a signed request from the server.
-- Change the status and add photos directly on the place page, as in my wireframe, without opening Edit.
 - Show photos of the real place through the Google Places API, which needs a billing account and a spending quota.
+- Replace the single shared login with real user accounts, so the list could belong to more than one person.
 
 ## Access control
 
