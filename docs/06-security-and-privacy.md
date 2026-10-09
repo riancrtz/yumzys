@@ -73,7 +73,7 @@ The half that matters more, because it is about other people.
 - [x] **No real classmates' names, numbers, emails or photos**, anywhere. Not in
       seed data, not in screenshots, not in the demo video. Consent for a course
       project does not cover the next ten years of a public repository
-- [x] Seed data is invented. Yours will be read
+- [ ] Seed data is invented. Yours will be read
 - [x] If real people tested your app, even three friends, their data is deleted
       before you submit
 - [x] If your app collects anything about anyone, the app says what it collects
@@ -85,8 +85,11 @@ do not collect anything you cannot justify.
 
 Notes:
 
-- Seed data is restaurants and cafés in Angeles and Clark, which are businesses,
-  not people. No personal information about anyone appears in it.
+- Seed data is not invented, and does not need to be. It is four real
+  restaurants and cafés in Angeles and Clark: LALA Garden, Grill Seoul, John's
+  Kitchen and Cafe Dia. These are businesses, not people, so no personal
+  information about anyone appears in it. The row is left unchecked because the
+  literal claim is false, not because the privacy concern behind it applies.
 - The app stores only what I type about a place: name, location, type, status,
   rating, notes, and photos I upload myself. There is one user, me.
 - Photos are resized in the browser to a maximum of 1280px before upload, which
