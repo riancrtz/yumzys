@@ -81,7 +81,7 @@ The half that matters more, because it is about other people.
 - [x] If real people tested your app, even three friends, their data is deleted
       before you submit
 - [x] If your app collects anything about anyone, the app says what it collects
-- [ ] Any face in a screenshot is stock, generated, or yours
+- [x] Any face in a screenshot is stock, generated, or yours
 
 If your project handles personal information about real people, you are inside
 the Philippine Data Privacy Act. Collect the minimum, say what you collect, and
