@@ -17,12 +17,12 @@ Three to five minutes, screen recorded, your own voice. Nobody watches ten.
 
 ## Before you record
 
-- [ ] Open the site five minutes early so a free-tier API is awake
-- [ ] Record the **deployed** URL, not `localhost`
-- [ ] Close your other tabs. Check for personal messages, other students' names,
+- [x] Open the site five minutes early so a free-tier API is awake
+- [x] Record the **deployed** URL, not `localhost`
+- [x] Close your other tabs. Check for personal messages, other students' names,
       and any `.env` file open in an editor
-- [ ] Seed realistic data
-- [ ] Do a full practice run. If something breaks, stop and start again rather
+- [x] Seed realistic data
+- [x] Do a full practice run. If something breaks, stop and start again rather
       than narrating the bug
 
 ## Have a fallback
