@@ -94,7 +94,7 @@ Notes:
   Kitchen and Cafe Dia. These are businesses, not people, so no personal
   information about anyone appears in it. The row is left unchecked because the
   literal claim is false, not because the privacy concern behind it applies.
-- The app stores only what I type about a place: name, location, type, status,
+- The app stores only what I type about a place: name, area, type, status,
   rating, notes, and photos I upload myself. There is one user, me.
 - Photos are resized in the browser to a maximum of 1280px before upload, which
   re-encodes them through a canvas and strips EXIF metadata, including any GPS
