@@ -40,7 +40,7 @@ Notes on the two items above that need qualifying:
       every text field
 - [x] `cors({ origin: allowedOrigins })` names your origins. Not `cors()` with no
       options, which allows every site on the internet
-- [ ] `NODE_ENV=production` on the host, and no stack trace in any response body
+- [x] `NODE_ENV=production` on the host, and no stack trace in any response body
 - [x] `helmet` installed, which is one line for several real protections
 - [x] Anything that costs money or accepts a password is rate limited
 - [x] Passwords, if you have accounts, are hashed with bcrypt and never logged
@@ -65,6 +65,10 @@ Notes:
 - The app connects to PostgreSQL as `places_app`, a role scoped to
   SELECT/INSERT/UPDATE/DELETE on `places`, USAGE on the schema, and USAGE,SELECT
   on `places_id_seq`. It is not the database owner.
+- Stack traces: the error handler logs the error to the server console and
+  returns a flat `{"error":"Something went wrong on the server"}` with a 500.
+  No stack reaches the client in any environment, so this holds regardless of
+  how `NODE_ENV` is set. `NODE_ENV=production` is set in Render's dashboard.
 
 ## Privacy
 
