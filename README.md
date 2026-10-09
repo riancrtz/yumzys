@@ -171,6 +171,6 @@ Credentials for grading are in the private workspace `project/README.md`, not he
 
 6APSI, Holy Angel University
 
-## Licence
+## License
 
 MIT, see LICENSE.
